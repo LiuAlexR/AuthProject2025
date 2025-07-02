@@ -51,6 +51,7 @@ public class WebController {
 
     @PostMapping("/data")
     public ResponseEntity<String> receiveLocation(@RequestBody LocationUpdate update) {
+        System.out.println("Data received");
         webService.receiveLocation(update);
         return ResponseEntity.ok("Received");
     }
