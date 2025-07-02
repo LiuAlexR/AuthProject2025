@@ -1,7 +1,9 @@
 package com.example.website_backend.controllers;
 
+import com.example.website_backend.dto.LocationUpdate;
 import com.example.website_backend.models.User;
 import com.example.website_backend.services.WebService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -45,5 +47,11 @@ public class WebController {
     public String getUser(@PathVariable String username) {
         User user = webService.getUser(username);
         return user.toString();
+    }
+
+    @PostMapping("/data")
+    public ResponseEntity<String> receiveLocation(@RequestBody LocationUpdate update) {
+        webService.receiveLocation(update);
+        return ResponseEntity.ok("Received");
     }
 }
