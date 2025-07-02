@@ -5,9 +5,15 @@ pub mod tester {
     pub mod printtest {
         use crate::helpers::math::more_test;
 
-        pub fn test() {
+        pub async fn test() {
             println!("TEST");
-            more_test();
+            let a = more_test().await;
+            match a {
+                Ok(Some(listing)) => println!("{}", listing),
+                Ok(None) => println!("None found"),
+                Err(_e) => println!("Error"),
+            }
+            
         }
     }
 }
