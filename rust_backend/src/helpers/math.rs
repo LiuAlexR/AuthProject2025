@@ -5,7 +5,6 @@ pub fn hash(password: &str) -> String {
     match the_hash {
         Ok(t) => return t,
         Err(_e) => return "error".to_string(),
-
     }
 }
 pub fn verify_password(password: &str, hashed_password: &str) -> bool {
