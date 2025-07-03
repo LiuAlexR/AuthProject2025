@@ -1,6 +1,6 @@
 pub mod helpers {
-    pub mod math;
     pub mod database_interface;
+    pub mod math;
 }
 pub mod tester {
     pub mod printtest {
@@ -14,11 +14,10 @@ pub mod tester {
         //         Ok(None) => println!("None found"),
         //         Err(_e) => println!("Error"),
         //     }
-            
+
         // }
     }
 }
 //Assume server stuff is abstracted away. I'm also on windows so Im also abstracting the database connections
-pub mod validator {
-    
-}
+pub mod validator {}
+

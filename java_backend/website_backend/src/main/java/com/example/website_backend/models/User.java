@@ -21,5 +21,4 @@ public class User {
     private double[] currentLocation;
     private ArrayList<double[]> path;
     private ArrayList<double[]> pins;
-
 }
