@@ -18,7 +18,7 @@ pub fn hash(password: &str) -> String {
     let the_hash = bcrypt::hash(password, 12);
     match the_hash {
         Ok(t) => return t,
-        Err(_e) => (return "error".to_string()),
+        Err(_e) => return "error".to_string(),
 
     }
 }
