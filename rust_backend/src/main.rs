@@ -1,17 +1,12 @@
-/*
-fn main() {
-    test();
-}*/
-
-// use lib::tester::printtest::test;
-use lib::helpers::math;
+use lib::helpers::database_interface::{self, get_max_id};
 #[tokio::main]
 async fn main() {
-    // test().await;
+    let username = "Bob";
     let password: &str = "1234";
-    let hash: String = math::hash(password);
-    println!("{}", hash);
-    let verified = math::verify_password("abc", &hash);
-    println!("{}", verified);
-
+    println!("{}", database_interface::verify_password_from_database(username, password).await)
+    // let max_id = get_max_id().await;
+    // match max_id {
+    //     Ok(item) => println!("{}", item),
+    //     Err(_) => print!("error"),
+    // }
 }
