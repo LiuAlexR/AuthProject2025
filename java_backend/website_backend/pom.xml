@@ -99,8 +99,6 @@
 
                 <artifactId>exec-maven-plugin</artifactId>
 
-                <version>${exec-maven-plugin.version}</version>
-
                 <configuration>
 
                     <cleanupDaemonThreads>false</cleanupDaemonThreads>

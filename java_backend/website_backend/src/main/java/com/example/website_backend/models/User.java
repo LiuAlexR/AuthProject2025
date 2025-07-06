@@ -15,6 +15,7 @@ import java.util.ArrayList;
 public class User {
     @Id
     private String id;
+    private int user_id;
     private String username;
     private String[] usersThatCanWatch;
     private String[] usersToWatch;
