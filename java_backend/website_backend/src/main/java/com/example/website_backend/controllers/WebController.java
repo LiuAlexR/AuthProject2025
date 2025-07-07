@@ -15,11 +15,19 @@ public class WebController {
         this.webService = webService;
     }
 
-//    @CrossOrigin("origins = *")
-//    @PostMapping("/saveUser/{user}")
-//    public void saveUser(@PathVariable User user) {
-//        webService.saveUser(user);
-//    }
+   @CrossOrigin("origins = *")
+   @PostMapping("/saveUser/{user}")
+   public void saveUser(@PathVariable User user) {
+    System.out.println(user);
+       webService.saveUser(user);
+   }
+   @CrossOrigin("origins = *")
+   @PostMapping("/test/{user}")
+   public String saveUser(@PathVariable String test) {
+    System.out.println(test);
+
+    return "test";
+   }
 
     @CrossOrigin(origins = "*")
     @GetMapping("/test")
@@ -53,6 +61,7 @@ public class WebController {
     public ResponseEntity<String> receiveLocation(@RequestBody LocationUpdate update) {
         System.out.println("Data received");
         webService.receiveLocation(update);
+        System.out.println(update.acc);
         return ResponseEntity.ok("Received");
     }
 }
