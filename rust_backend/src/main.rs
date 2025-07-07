@@ -1,4 +1,9 @@
-use actix_web::{App, HttpResponse, HttpServer, Responder, get, post, web, web::Json};
+use actix_web::{
+    App, HttpResponse, HttpServer, Responder,
+    body::MessageBody,
+    get, post,
+    web::{self, Json},
+};
 use lib::services::*;
 
 use actix_cors::Cors;
@@ -6,8 +11,8 @@ use lib::models::*;
 
 #[post("/register_user")]
 async fn hello(userData: Json<User>) -> impl Responder {
-    register_user(userData.into_inner()).await;
-    HttpResponse::Ok().body("WOW")
+    let key = register_user(userData.into_inner()).await;
+    HttpResponse::Ok().json(key)
 }
 
 #[actix_web::main]
