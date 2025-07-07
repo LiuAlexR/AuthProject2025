@@ -1,23 +1,27 @@
-use lib::helpers::database_interface::{create_new_user, get_max_id};
-use lib::helpers::math::create_one_time_password;
-use std::{thread, time::Duration};
-#[tokio::main]
-async fn main() {
-    let username: &str = "Bobb";
-    let password: &str = "12345";
-    // println!("{}", database_interface::verify_password_from_database(username, password).await)
+use actix_web::{App, HttpResponse, HttpServer, Responder, get, post, web, web::Json};
+use lib::services::*;
 
-    let _ = create_new_user(username, password).await;
-    let max_id = get_max_id().await;
-    match max_id {
-        Ok(item) => println!("{}", item),
-        Err(_) => print!("error"),
-    }
+use actix_cors::Cors;
+use lib::models::*;
 
-    create_one_time_password(password, "Lebron");
+#[post("/register_user")]
+async fn hello(userData: Json<User>) -> impl Responder {
+    register_user(userData.into_inner()).await;
+    HttpResponse::Ok().body("WOW")
+}
 
-    // while (true) {
-    //     create_one_time_password(password, "Lebron");
-    //     thread::sleep(Duration::from_secs(30));
-    // }
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| {
+        let cors = Cors::default()
+            .allowed_origin("http://localhost:5173")
+            .allow_any_method()
+            .allow_any_header()
+            .max_age(3600);
+
+        App::new().wrap(cors).service(hello)
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
 }

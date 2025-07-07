@@ -99,3 +99,18 @@ pub async fn create_new_user(username: &str, password: &str) -> Result<(), mongo
     println!("User created!");
     Ok(())
 }
+
+pub async fn add_secret_key(username: &str, key: &str) -> Result<(), mongodb::error::Error> {
+    let client = Client::with_uri_str(URI).await?;
+    let database = client.database("Life360");
+    let collection: Collection<Document> = database.collection("authentication");
+
+    let new_key = doc! {
+        "username": username,
+        "secret_key":key,
+    };
+
+    collection.insert_one(new_key).await?;
+
+    Ok(())
+}

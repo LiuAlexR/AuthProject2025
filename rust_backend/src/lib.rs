@@ -2,6 +2,8 @@ pub mod helpers {
     pub mod database_interface;
     pub mod math;
 }
+pub mod models;
+pub mod services;
 pub mod tester {
     pub mod printtest {
         // use crate::helpers::math::more_test;
@@ -20,4 +22,3 @@ pub mod tester {
 }
 //Assume server stuff is abstracted away. I'm also on windows so Im also abstracting the database connections
 pub mod validator {}
-
