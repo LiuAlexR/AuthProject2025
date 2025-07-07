@@ -2,18 +2,19 @@ import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 export default function QR_Page() {
   const [value, setValue] = useState<string>("");
-
   const [show, setShow] = useState<boolean>(false);
+
   function generateQRCode(key: string) {
     const LABEL = "LEBRON";
-
     const URI: string[] = [];
+
     URI.push("otpauth://totp/");
     URI.push(LABEL);
     URI.push("?secret=");
     URI.push(key);
     URI.push("&issuer=Life360");
     const finalURI = URI.join("");
+
     console.log(finalURI);
 
     setValue(finalURI);

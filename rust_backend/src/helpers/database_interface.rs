@@ -116,7 +116,6 @@ pub async fn add_secret_key(username: &str, key: &str) -> Result<(), mongodb::er
     Ok(())
 }
 
-// Option 1: Using a typed struct (recommended)
 pub async fn get_secret_key_typed(username: &str) -> Result<Document, mongodb::error::Error> {
     let client = Client::with_uri_str(URI).await?;
     let database = client.database("Life360");
