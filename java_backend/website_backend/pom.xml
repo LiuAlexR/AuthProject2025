@@ -49,6 +49,18 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-crypt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
 	</dependencies>
 
 	<build>
@@ -77,6 +89,23 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			            <plugin>
+
+                <!-- Adding this plugin, so we don't need to add -Dexec.cleanupDaemonThreads=false in the mvn cmd line -->
+
+                <!-- to avoid the IllegalThreadStateException when running with Maven -->
+
+                <groupId>org.codehaus.mojo</groupId>
+
+                <artifactId>exec-maven-plugin</artifactId>
+
+                <configuration>
+
+                    <cleanupDaemonThreads>false</cleanupDaemonThreads>
+
+                </configuration>
+
+            </plugin>
 		</plugins>
 	</build>
 
