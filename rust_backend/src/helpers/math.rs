@@ -1,5 +1,5 @@
 use bcrypt;
-use hex_literal::hex;
+use data_encoding::BASE32;
 use hmac::{Hmac, Mac};
 use sha2::Sha256;
 pub fn hash(password: &str) -> String {
@@ -31,4 +31,10 @@ pub fn create_one_time_password(password: &str, key: &str) -> u32 {
     println!("{}", code);
 
     return *code;
+}
+
+pub fn create_secret_key() -> String {
+    let test = "LEBRON JAMES";
+
+    BASE32.encode(test.as_bytes())
 }
