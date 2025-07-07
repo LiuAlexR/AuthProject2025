@@ -1,8 +1,9 @@
 use crate::helpers::math::{hash, verify_password};
-use mongodb::{
-    Client, Collection,
-    bson::{Document, doc},
-};
+use crate::models::UserWithKey;
+use mongodb::{Client, Collection, bson::Document, bson::doc};
+use serde::{Deserialize, Serialize};
+use std::error::Error;
+
 const URI: &str = "mongodb://localhost:27017/";
 pub async fn get_user_password(username: &str) -> mongodb::error::Result<Option<Document>> {
     // Create a new client and connect to the server
@@ -103,7 +104,7 @@ pub async fn create_new_user(username: &str, password: &str) -> Result<(), mongo
 pub async fn add_secret_key(username: &str, key: &str) -> Result<(), mongodb::error::Error> {
     let client = Client::with_uri_str(URI).await?;
     let database = client.database("Life360");
-    let collection: Collection<Document> = database.collection("authentication");
+    let collection: Collection<Document> = database.collection("keys");
 
     let new_key = doc! {
         "username": username,
@@ -113,4 +114,20 @@ pub async fn add_secret_key(username: &str, key: &str) -> Result<(), mongodb::er
     collection.insert_one(new_key).await?;
 
     Ok(())
+}
+
+// Option 1: Using a typed struct (recommended)
+pub async fn get_secret_key_typed(username: &str) -> Result<Document, mongodb::error::Error> {
+    let client = Client::with_uri_str(URI).await?;
+    let database = client.database("Life360");
+    let collection: Collection<Document> = database.collection("keys");
+
+    let doc: Document = collection
+        .find_one(doc! {
+            "username": username,
+        })
+        .await?
+        .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "User not found"))?;
+
+    Ok(doc)
 }

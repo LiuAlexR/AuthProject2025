@@ -42,10 +42,29 @@ export default function QR_Page() {
     }
   }
 
+  async function getCodes() {
+    const username = "Lebron";
+    console.log(JSON.stringify(username));
+    try {
+      const response = await fetch("http://localhost:8080/get_codes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: username,
+      });
+
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <>
       {show && <QRCodeSVG value={value} size={200} />}
       <button onClick={registerUser}> Hello </button>
+
+      <button onClick={getCodes}> GET CODES </button>
     </>
   );
 }
