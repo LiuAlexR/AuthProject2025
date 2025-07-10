@@ -1,9 +1,9 @@
 package com.example.website_backend.models;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.bson.Document;
 public class UserExposed {
     private int user_id;
     private double latitude;
@@ -52,5 +52,8 @@ public class UserExposed {
     }
     public void setDatetime(long timeOfEventMS) {
         this.timeOfEventMS = timeOfEventMS;
+    }
+    public Document getDocument(){
+        return new Document("user_id", user_id).append("latitude", latitude).append("longitude", longitude).append("altitude", altitude).append("unixTime", timeOfEventMS);
     }
 }

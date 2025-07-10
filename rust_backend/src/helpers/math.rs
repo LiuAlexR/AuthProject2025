@@ -2,7 +2,9 @@ use base32;
 use bcrypt;
 use data_encoding::BASE32;
 use hmac::{Hmac, Mac};
-use sha1::Sha1;
+use sha1::{ Sha1};
+use sha2::Sha256;
+use base64::{engine::general_purpose::URL_SAFE, Engine as _};
 
 pub fn hash(password: &str) -> String {
     //Hashes the password
@@ -80,4 +82,16 @@ pub fn create_secret_key() -> String {
     let test = "LEBRON JAMES";
 
     BASE32.encode(test.as_bytes())
+}
+pub fn create_jwt(header: &str, body: &str) -> Result<String, hmac::digest::InvalidLength> {
+    let secret = "a-string-secret-at-least-256-bits-long";
+    let header_token: String = URL_SAFE.encode(header.replace(" ", "").replace("\n", ""));
+    let body_token: String = URL_SAFE.encode(body.replace(" ", "").replace("\n", ""));
+    let combined = format!("{}.{}", header_token, body_token);
+    type HmacSha256 = Hmac<Sha256>;
+    let mut hashed_body = HmacSha256::new_from_slice(secret.as_bytes())?;
+    hashed_body.update(combined.as_bytes());
+    let result = hashed_body.finalize().into_bytes();
+    let final_token = format!("{}.{}", combined, URL_SAFE.encode(result));
+    return Ok(final_token);
 }
