@@ -1,9 +1,10 @@
 use lib::helpers::math;
+use lib::helpers::math::verify_jwt_signature;
 // use actix_web::{App, Error, HttpResponse, HttpServer, Responder, get, post, web::Json};
-use lib::services::*;
+// use lib::services::*;
 
 // use actix_cors::Cors;
-use lib::models::*;
+// use lib::models::*;
 use base64::{engine::general_purpose::URL_SAFE, Engine as _};
 // #[post("/register_user")]
 // async fn register_user(userData: Json<User>) -> impl Responder {
@@ -38,7 +39,7 @@ use base64::{engine::general_purpose::URL_SAFE, Engine as _};
 // }
 fn main() {
     let text = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
-    let body = "{\"expire\":111}";
+    let body = "{\"expire\":1111}";
     let token = math::create_jwt(text, body);
     let new_body = body.replace(" ", "").replace("\n", "");
     let encoded = URL_SAFE.encode(new_body);
@@ -52,4 +53,5 @@ fn main() {
         Ok(result) => println!("{}", result),
         Err(error) => println!("{}", error)
     }
+    println!("{}", verify_jwt_signature("eyJhbGciOiI1NiIsInR5cCI6IkpXVCJ9.eyJleHBpcmUiOjExMTF9.J3KwXRrTHuOEkX0bXWRtLJwBnBpNQNqSnioeIMYt-aE=").unwrap());
 }

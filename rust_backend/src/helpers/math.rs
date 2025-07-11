@@ -95,3 +95,19 @@ pub fn create_jwt(header: &str, body: &str) -> Result<String, hmac::digest::Inva
     let final_token = format!("{}.{}", combined, URL_SAFE.encode(result));
     return Ok(final_token);
 }
+pub fn verify_jwt_signature(token: &str) -> Result<bool, hmac::digest::InvalidLength> {
+    let secret = "a-string-secret-at-least-256-bits-long";
+    let mut split_token = token.split(".");
+    let head_body = format!("{}.{}", split_token.next().unwrap(), split_token.next().unwrap());
+    type HmacSha256 = Hmac<Sha256>;
+    let mut hashed_body = HmacSha256::new_from_slice(secret.as_bytes())?;
+    hashed_body.update(head_body.as_bytes());
+    let result = hashed_body.finalize().into_bytes();
+    let final_token = format!("{}.{}", head_body, URL_SAFE.encode(result));
+    if token == final_token {
+        return Ok(true);
+    } else {
+        return Ok(false);
+    }
+
+}
