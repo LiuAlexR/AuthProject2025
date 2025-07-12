@@ -1,3 +1,5 @@
+use std::time::{SystemTime, UNIX_EPOCH};
+
 use base32;
 use bcrypt;
 use data_encoding::BASE32;
@@ -83,8 +85,10 @@ pub fn create_secret_key() -> String {
 
     BASE32.encode(test.as_bytes())
 }
-pub fn create_jwt(header: &str, body: &str) -> Result<String, hmac::digest::InvalidLength> {
+/// This should not be called by itself. All implementations should be called with other functions. Or do. I don't care
+fn create_jwt(header: &str, body: &str) -> Result<String, hmac::digest::InvalidLength> {
     let secret = "a-string-secret-at-least-256-bits-long";
+    // Cleans the inputs by removing newlines and spaces
     let header_token: String = URL_SAFE.encode(header.replace(" ", "").replace("\n", ""));
     let body_token: String = URL_SAFE.encode(body.replace(" ", "").replace("\n", ""));
     let combined = format!("{}.{}", header_token, body_token);
@@ -95,6 +99,7 @@ pub fn create_jwt(header: &str, body: &str) -> Result<String, hmac::digest::Inva
     let final_token = format!("{}.{}", combined, URL_SAFE.encode(result));
     return Ok(final_token);
 }
+/// Only verifies whether or not the secret can encrypt the payload. Does not check validity of body
 pub fn verify_jwt_signature(token: &str) -> Result<bool, hmac::digest::InvalidLength> {
     let secret = "a-string-secret-at-least-256-bits-long";
     let mut split_token = token.split(".");
@@ -109,5 +114,14 @@ pub fn verify_jwt_signature(token: &str) -> Result<bool, hmac::digest::InvalidLe
     } else {
         return Ok(false);
     }
-
 }
+/// Generates a jwt with a predefined header and a expiration time (exp) of 30 minutes after the current time, in ms after epooch
+pub fn generate_jwt() -> Result<String, hmac::digest::InvalidLength> {
+    let secret =  "a-string-secret-at-least-256-bits-long";
+    let header = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
+    let current_time = SystemTime::now();
+    let ms_since_epoch = current_time.duration_since(UNIX_EPOCH).expect("Time should go forward!").as_millis() + 1800000;
+    let body = format!("{{\"exp\":{}}}", ms_since_epoch);
+    return create_jwt(&header, &body);
+}
+// todo!("Talk about whether or not to make stateless https://medium.com/@byeduardoac/managing-jwt-token-expiration-bfb2bd6ea584 says should be stateless, but just storing expiration is simpler");
