@@ -4,12 +4,11 @@ use crate::models::*;
 use actix_web::Error;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-pub async fn register_user_service(userData: User) -> String {
-    let password = hash(&userData.password);
-    let _ = create_new_user(&userData.username, &password).await;
+pub async fn register_user_service(user_data: User) -> String {
+    let _ = create_new_user(&user_data.username, &user_data.password).await;
 
     let s = create_secret_key();
-    add_secret_key(&userData.username, &s).await;
+    let _ = add_secret_key(&user_data.username, &s).await;
 
     return s;
 }

@@ -1,8 +1,6 @@
 use crate::helpers::math::{hash, verify_password};
-use crate::models::UserWithKey;
 use mongodb::{Client, Collection, bson::Document, bson::doc};
-use serde::{Deserialize, Serialize};
-use std::error::Error;
+
 
 const URI: &str = "mongodb://localhost:27017/";
 pub async fn get_user_password(username: &str) -> mongodb::error::Result<Option<Document>> {
@@ -54,7 +52,7 @@ pub async fn get_max_id() -> Result<i32, mongodb::error::Error> {
     match found {
         Some(found_document) => match found_document.get_i32("user_id") {
             Ok(id) => Ok(id),
-            Err(_) => Ok(0),
+            Err(error) => panic!("{}", error),
         },
         None => Ok(0),
     }

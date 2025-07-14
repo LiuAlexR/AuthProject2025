@@ -1,0 +1,6 @@
+.link {
+    color: black; /*rgb(var(--primary-dark))*/
+    text-decoration: none;
+    background: transparent;
+    border: none;
+}
