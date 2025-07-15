@@ -1,16 +1,14 @@
 package com.example.website_backend.services;
 
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.website_backend.dto.LocationUpdate;
 import com.example.website_backend.models.User;
-import com.example.website_backend.models.UserExposed;
 import com.example.website_backend.repositories.LocationRepository;
 import com.example.website_backend.repositories.WebRepository;
-
-import java.util.List;
 
 @Service
 public class WebService {
@@ -46,7 +44,7 @@ public class WebService {
     }
 
     public List<LocationUpdate> getLocation() {
-        rreturn locationRepository.findTopByOrderByTstDesc(Pageable.ofSize(10));
+        return locationRepository.findTopByOrderByTstDesc(Pageable.ofSize(10));
     }
 
 }
