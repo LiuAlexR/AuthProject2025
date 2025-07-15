@@ -6,6 +6,8 @@ import "leaflet-defaulticon-compatibility";
 import { Route, Routes, BrowserRouter, Link } from "react-router";
 import QR_Page from "./QR-Page";
 import Map from "./Map";
+import Home from "./pages/home/Home";
+import Login from "./pages/login/Login";
 
 function App() {
   return (
