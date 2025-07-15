@@ -1,5 +1,7 @@
 package com.example.website_backend.services;
 
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.website_backend.dto.LocationUpdate;
@@ -7,6 +9,9 @@ import com.example.website_backend.models.User;
 import com.example.website_backend.models.UserExposed;
 import com.example.website_backend.repositories.LocationRepository;
 import com.example.website_backend.repositories.WebRepository;
+
+import java.util.List;
+
 @Service
 public class WebService {
     private final WebRepository webRepository;
@@ -28,16 +33,20 @@ public class WebService {
 
     public void receiveLocation(LocationUpdate update) {
         String usernamePassword = update.tid;
-        int index = usernamePassword.indexOf('.'); //Assume user puts USERNAME.PASSWORD in tid
-        String username = usernamePassword.substring(0, index);
-        String password = usernamePassword.substring(index+1, usernamePassword.length());
+//        int index = usernamePassword.indexOf('.'); //Assume user puts USERNAME.PASSWORD in tid
+//        String username = usernamePassword.substring(0, index);
+//        String password = usernamePassword.substring(index+1, usernamePassword.length());
         /**
          * TODO - Validate Credentials, get user id
          */
         int userID = 1;
-
-        UserExposed user = new UserExposed(userID, update.lat, update.lon, update.alt, System.currentTimeMillis());
+//
+//        UserExposed user = new UserExposed(userID, update.lat, update.lon, update.alt, System.currentTimeMillis());
         locationRepository.save(update);
+    }
+
+    public List<LocationUpdate> getLocation() {
+        rreturn locationRepository.findTopByOrderByTstDesc(Pageable.ofSize(10));
     }
 
 }

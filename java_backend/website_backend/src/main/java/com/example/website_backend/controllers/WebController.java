@@ -6,6 +6,8 @@ import com.example.website_backend.services.WebService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(path = "Webserver/")
 public class WebController {
@@ -54,5 +56,11 @@ public class WebController {
         System.out.println("Data received");
         webService.receiveLocation(update);
         return ResponseEntity.ok("Received");
+    }
+
+    @CrossOrigin(origins = "*")
+    @GetMapping("/getLocation")
+    public List<LocationUpdate> getLocation() {
+        return webService.getLocation();
     }
 }
