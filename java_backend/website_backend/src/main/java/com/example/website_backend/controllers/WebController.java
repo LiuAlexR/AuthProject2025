@@ -50,14 +50,20 @@ public class WebController {
         User user = webService.getUser(username);
         return user.toString();
     }
-
+    @CrossOrigin(origins = "*")
     @PostMapping("/data")
     public ResponseEntity<String> receiveLocation(@RequestBody LocationUpdate update) {
         System.out.println("Data received");
         webService.receiveLocation(update);
         return ResponseEntity.ok("Received");
     }
-
+    @CrossOrigin(origins = "*")
+    @PostMapping("/data/{username}")
+    public ResponseEntity<String> receiveLocation(@PathVariable String username, @RequestBody LocationUpdate update) {
+        System.out.println("Data received");
+        webService.receiveLocation(update);
+        return ResponseEntity.ok("Received");
+    }
     @CrossOrigin(origins = "*")
     @GetMapping("/getLocation")
     public List<LocationUpdate> getLocation() {
