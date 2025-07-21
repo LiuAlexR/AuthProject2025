@@ -1,13 +1,13 @@
 package com.example.website_backend;
 
-import com.example.website_backend.services.MathService;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import com.example.website_backend.services.MathService;
 
 @SpringBootApplication
 public class WebsiteBackendApplication {
 	public static void main(String[] args) {
-		 SpringApplication.run(WebsiteBackendApplication.class, args);
+		 // SpringApplication.run(WebsiteBackendApplication.class, args);
 
 		
 		//https://www.mongodb.com/docs/drivers/java/sync/current/crud/insert/
@@ -18,9 +18,9 @@ public class WebsiteBackendApplication {
 		// 	MongoCollection<Document> userPublic = theUsers.getCollection("userPublic");
 		// 	System.out.println(userPublic.insertOne(new Document("test", "three").append("moreTest", "two")));
 		// }
-//		MathService math = new MathService();
-//		boolean verified = math.verifyJWTSignature("eyJhbGciOiJIUzI1NiIsI5cCI6IkpXVCJ9.eyJleHBpcmUiOjExMTF9.J3KwXRrTHuOEkX0bXWRtLJwBnBpNQNqSnioeIMYt-aE=");
-//		System.out.println(verified);
+		MathService math = new MathService();
+		boolean verified = math.verifyJWTSignature("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiNTI1NDk5ODU5MjF9.tYoDsfVnUo7koyVeELrdi_b-EF7GyJWuZ4SmBEf_cMI=");
+		System.out.println(verified);
 	}
 
 }

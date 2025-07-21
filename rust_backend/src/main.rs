@@ -1,4 +1,5 @@
 use actix_web::{App, Error, HttpResponse, HttpServer, Responder, get, post, web::Json};
+use lib::helpers::math::generate_jwt;
 use lib::services::*;
 
 use actix_cors::Cors;
@@ -38,5 +39,5 @@ use lib::helpers::database_interface::{create_new_user, get_max_id};
 // }
 #[tokio::main]
 async fn main() {
-    create_new_user("Bob", "12345").await;
+    println!("{}", generate_jwt().unwrap());
 }
