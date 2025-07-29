@@ -2,13 +2,20 @@ package com.example.website_backend.services;
 
 import java.util.List;
 
+import org.bson.Document;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.website_backend.dto.LocationUpdate;
 import com.example.website_backend.models.User;
+import com.example.website_backend.models.UserExposed;
 import com.example.website_backend.repositories.LocationRepository;
 import com.example.website_backend.repositories.WebRepository;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
 @Service
 public class WebService {
@@ -29,6 +36,20 @@ public class WebService {
         return webRepository.findByUsername(username);
     }
 
+    // TODO FINISH THIS
+    public boolean insertUser(UserExposed data){
+        return false;
+    }
+    public Document getAuthDocument(String username) {
+		String connectionString = "mongodb://localhost:27017/";
+		MongoClient mongoClient = MongoClients.create(connectionString);
+        System.out.println("=> Connection successful : ");
+        MongoDatabase theUsers = mongoClient.getDatabase("Life360");
+        MongoCollection<Document> userPublic = theUsers.getCollection("authentication");
+        // System.out.println(userPublic.insertOne(new Document("test", "three").append("moreTest", "two")));
+        FindIterable<Document> item = userPublic.find(new Document("username", username));
+        return item.first(); //Will throw error if user is not found, handle it then. Users with the same username are enforced to not exist at user creation
+    }
     public void receiveLocation(LocationUpdate update) {
         String usernamePassword = update.tid;
 //        int index = usernamePassword.indexOf('.'); //Assume user puts USERNAME.PASSWORD in tid

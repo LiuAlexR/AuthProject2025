@@ -2,7 +2,11 @@ package com.example.website_backend.controllers;
 
 import com.example.website_backend.dto.LocationUpdate;
 import com.example.website_backend.models.User;
+import com.example.website_backend.models.UserExposed;
 import com.example.website_backend.services.WebService;
+
+import org.bson.Document;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,6 +64,16 @@ public class WebController {
     @CrossOrigin(origins = "*")
     @PostMapping("/data/{username}")
     public ResponseEntity<String> receiveLocation(@PathVariable String username, @RequestBody LocationUpdate update) {
+        Document auth;
+        try {
+            auth = webService.getAuthDocument(username);
+        } catch(Exception e){
+            return new ResponseEntity<>("User Not Found", HttpStatus.BAD_REQUEST);
+        }
+        
+        UserExposed theUser = update.toUserExposed();
+        theUser.setUser_id((int) auth.get("user_id"));
+        theUser.setDatetime(System.currentTimeMillis());
         System.out.println("Data received");
         webService.receiveLocation(update);
         return ResponseEntity.ok("Received");
