@@ -117,7 +117,7 @@ pub fn verify_jwt_signature(token: &str) -> Result<bool, hmac::digest::InvalidLe
 }
 /// Generates a jwt with a predefined header and a expiration time (exp) of 30 minutes after the current time, in ms after epooch
 pub fn generate_jwt() -> Result<String, hmac::digest::InvalidLength> {
-    let secret =  "a-string-secret-at-least-256-bits-long";
+    // let secret =  "a-string-secret-at-least-256-bits-long";
     let header = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
     let current_time = SystemTime::now();
     let ms_since_epoch = current_time.duration_since(UNIX_EPOCH).expect("Time should go forward!").as_millis() + 1800000;
