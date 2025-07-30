@@ -3,6 +3,7 @@ package com.example.website_backend.services;
 import java.util.List;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,8 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.UpdateOptions;
 
 @Service
 public class WebService {
@@ -63,7 +66,15 @@ public class WebService {
 //        UserExposed user = new UserExposed(userID, update.lat, update.lon, update.alt, System.currentTimeMillis());
         locationRepository.save(update);
     }
-
+    public void saveLocation(Document document){
+        String connectionString = "mongodb://localhost:27017/";
+		MongoClient mongoClient = MongoClients.create(connectionString);
+        System.out.println("=> Connection successful : ");
+        MongoDatabase theUsers = mongoClient.getDatabase("Life360");
+        MongoCollection<Document> userLocations = theUsers.getCollection("currentLocation");
+        Bson filter = Filters.eq("user_id", document.get("user_id"));
+        userLocations.updateOne(filter, new Document("$set", document), new UpdateOptions().upsert(true)); //TODO decide whether to upsert
+    }
     public List<LocationUpdate> getLocation() {
         return locationRepository.findTopByOrderByTstDesc(Pageable.ofSize(10));
     }

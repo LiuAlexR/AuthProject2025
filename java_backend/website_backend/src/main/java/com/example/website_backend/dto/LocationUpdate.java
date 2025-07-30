@@ -12,7 +12,4 @@ public class LocationUpdate {
     public double alt;
     public double vel;
     public int batt;
-    public  UserExposed toUserExposed() {
-        return new UserExposed(0, lat, lon, alt, 0);
-    }
 }

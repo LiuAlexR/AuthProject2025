@@ -68,14 +68,22 @@ public class WebController {
         try {
             auth = webService.getAuthDocument(username);
         } catch(Exception e){
+            System.out.println("User " + username + " was not found");
             return new ResponseEntity<>("User Not Found", HttpStatus.BAD_REQUEST);
         }
-        
-        UserExposed theUser = update.toUserExposed();
+        // TODO Decide how to handle authentication on location post side
+        UserExposed theUser = new UserExposed(0, 0, 0, 0, 0);
         theUser.setUser_id((int) auth.get("user_id"));
         theUser.setDatetime(System.currentTimeMillis());
-        System.out.println("Data received");
-        webService.receiveLocation(update);
+        theUser.setLatitude(update.lat);
+        theUser.setLongitude(update.lon);
+        theUser.setAltitude(update.alt);
+        try {
+            webService.saveLocation(theUser.getDocument());
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        System.out.println("Data received to" + username);
         return ResponseEntity.ok("Received");
     }
     @CrossOrigin(origins = "*")
