@@ -1,4 +1,5 @@
 use actix_web::{App, Error, HttpResponse, HttpServer, Responder, get, post, web::Json};
+use lib::helpers::database_interface::verify_password_from_database;
 use lib::helpers::math::generate_jwt;
 use lib::services::*;
 
@@ -10,34 +11,42 @@ async fn register_user(user_data: Json<User>) -> impl Responder {
     HttpResponse::Ok().json(key)
 }
 
-// #[post("/get_codes")]
-// async fn get_code(username: String) -> Result<impl Responder, Error> {
-//     let codes = get_totp_codes_service(&username).await?;
+#[post("/get_codes")]
+async fn get_code(username: String) -> Result<impl Responder, Error> {
+    let codes = get_totp_codes_service(&username).await?;
 
-//     Ok(HttpResponse::Ok().json(codes))
-// }
-
-// #[actix_web::main]
-// async fn main() -> std::io::Result<()> {
-//     HttpServer::new(|| {
-//         let cors = Cors::default()
-//             .allowed_origin("http://localhost:5173")
-//             .allow_any_method()
-//             .allow_any_header()
-//             .max_age(3600);
-
-use lib::helpers::database_interface::{create_new_user, get_max_id};
-
-//         App::new()
-//             .wrap(cors)
-//             .service(register_user)
-//             .service(get_code)
-//     })
-//     .bind(("127.0.0.1", 8081))?
-//     .run()
-//     .await
-// }
-#[tokio::main]
-async fn main() {
-    println!("{}", generate_jwt().unwrap());
+    Ok(HttpResponse::Ok().json(codes))
 }
+#[post("/verify_login")]
+async fn verify_login(user_data: Json<User>) -> impl Responder {
+    let is_password_correct: bool = verify_password_from_database(&user_data.username, &user_data.password).await;
+    if !is_password_correct {
+        HttpResponse::Unauthorized().json("Wrong Password")
+    } else {
+        let jwt = generate_jwt().unwrap();
+        HttpResponse::Ok().json(jwt)
+    }
+}
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| {
+        let cors = Cors::default()
+            .allowed_origin("http://localhost:5173")
+            .allow_any_method()
+            .allow_any_header()
+            .max_age(3600);
+        App::new()
+            .wrap(cors)
+            .service(register_user)
+            .service(get_code)
+            .service(verify_login)
+    })
+    .bind(("127.0.0.1", 8081))?
+    .run()
+    .await
+}
+// #[tokio::main]
+// async fn main() {
+//     println!("{}", generate_jwt().unwrap());
+// }
