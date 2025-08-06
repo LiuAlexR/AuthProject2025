@@ -77,15 +77,15 @@ export default function Login() {
               <input
                 type="text"
                 placeholder="username"
-                value={inputs.username}
-                onChange={handleChange}
+                // value={inputs.username}
+                // onChange={handleChange}
                 size={40}
                 className="border-solid border-2 border-white rounded-2xl p-2"
               />
               <input
                 type="password"
                 placeholder="password"
-                value={inputs.password}
+                // value={inputs.password}
                 onChange={handleChange}
                 className="border-solid border-2 border-white rounded-2xl p-2"
               />
