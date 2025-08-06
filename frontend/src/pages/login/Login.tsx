@@ -26,21 +26,19 @@ export default function Login() {
     const dataToSend = {
         ...inputs
     };
-    console.log(JSON.stringify(dataToSend));
+    
     try {
-        const response = await fetch("http://localhost:8081/verify_user", {
+        const response = await fetch("http://localhost:8081/verify_login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(dataToSend),
         });
-
         if (!response.ok) {
             const errorData = await response.json(); // Parse error response body
             throw new Error(errorData.message || "Failed to submit form. Please try again.");
         }
-
         const result = await response.json(); // Parse successful response body
         console.log("Form submitted successfully:", result);
 
