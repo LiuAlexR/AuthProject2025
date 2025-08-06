@@ -77,24 +77,24 @@ public class WebController {
             System.out.println("User " + username + " was not found");
             return new ResponseEntity<>("User Not Found", HttpStatus.BAD_REQUEST);
         }
-        String jsonPayload = String.format("{\"username\":\"%s\",\"password\":\"%s\"}", username, update.tid);
+        // String jsonPayload = String.format("{\"username\":\"%s\",\"password\":\"%s\"}", username, update.tid);
         try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI("https://localhost:8081/verify_login"))
-                    .timeout(Duration.ofSeconds(10))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
-                    .build();
+            // HttpRequest request = HttpRequest.newBuilder()
+            //         .uri(new URI("http://localhost:8081/verify_login"))
+            //         .timeout(Duration.ofSeconds(10))
+            //         .header("Content-Type", "application/json")
+            //         .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+            //         .build();
 
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            // HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() != 200) {
-                System.out.println("Failed to verify user. Status code: " + response.statusCode());
-                return new ResponseEntity<>(response.body(), HttpStatus.UNAUTHORIZED);
-            }
+            // if (response.statusCode() != 200) {
+            //     System.out.println("Failed to verify user. Status code: " + response.statusCode());
+            //     return new ResponseEntity<>(response.body(), HttpStatus.UNAUTHORIZED);
+            // }
 
-            String jwt = response.body();
-            System.out.println("Login successful. JWT received: " + jwt);
+            // String jwt = response.body();
+            // System.out.println("Login successful. JWT received: " + jwt);
 
             UserExposed theUser = new UserExposed(0, 0, 0, 0, 0);
             theUser.setUser_id((int) auth.get("user_id"));

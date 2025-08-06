@@ -19,6 +19,7 @@ async fn get_code(username: String) -> Result<impl Responder, Error> {
 }
 #[post("/verify_login")]
 async fn verify_login(user_data: Json<User>) -> impl Responder {
+    println!("Here!");
     let is_password_correct: bool = verify_password_from_database(&user_data.username, &user_data.password).await;
     if !is_password_correct {
         HttpResponse::Unauthorized().json("Wrong Password")
@@ -30,6 +31,7 @@ async fn verify_login(user_data: Json<User>) -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    println!("Starting!");
     HttpServer::new(|| {
         let cors = Cors::default()
             .allowed_origin("http://localhost:5173")
