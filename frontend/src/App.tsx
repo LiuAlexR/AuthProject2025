@@ -25,6 +25,10 @@ function App() {
               path="/login"
               element={<Transition page={<Login />} initialState={false} />}
             />
+            <Route
+              path="/map"
+              element={<Transition page={<Map />} initialState={false} />}
+            />
 
             <Route path="/auth" element={<QR_Page />} />
           </Routes>
