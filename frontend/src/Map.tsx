@@ -2,7 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { ServerURL } from "./serverCallsEnum";
 import type { LatLngExpression } from "leaflet";
-
+import "leaflet/dist/leaflet.css";
+import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
+import "leaflet-defaulticon-compatibility";
+import "./App.css";
 interface LocationUpdate {
   _type: string;
   tid: string;
