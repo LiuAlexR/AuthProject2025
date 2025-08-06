@@ -26,7 +26,7 @@ export default function Login() {
     const dataToSend = {
         ...inputs
     };
-
+    console.log(JSON.stringify(dataToSend));
     try {
         const response = await fetch("http://localhost:8081/verify_user", {
             method: "POST",
@@ -77,14 +77,16 @@ export default function Login() {
               <input
                 type="text"
                 placeholder="username"
-                // value={inputs.username}
-                // onChange={handleChange}
+                name="username"
+                value={inputs.username}
+                onChange={handleChange}
                 size={40}
                 className="border-solid border-2 border-white rounded-2xl p-2"
               />
               <input
                 type="password"
                 placeholder="password"
+                name="password"
                 // value={inputs.password}
                 onChange={handleChange}
                 className="border-solid border-2 border-white rounded-2xl p-2"
@@ -92,9 +94,8 @@ export default function Login() {
 
               <input
                 type="submit"
-                value="Submit"
                 disabled={loading}
-                className="bg-emerald-300 p-3 rounded-3xl w-30 text-black"
+                className="bg-emerald-300 p-3 rounded-3xl w-30 text-black cursor-pointer"
               />
             </form>
           </div>
