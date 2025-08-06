@@ -73,22 +73,27 @@ export default function Login() {
 
         <div className="row-start-2 flex justify-center ">
           <div className="bg-purple-100 h-1/2 w-100 rounded-3xl m-15 shadow-pink-300 shadow-lg">
-            <form className="h-full w-full flex justify-center items-center flex-col gap-5">
+            <form className="h-full w-full flex justify-center items-center flex-col gap-5" onSubmit={handleSubmit}>
               <input
-                type="email"
-                placeholder="email"
+                type="text"
+                placeholder="username"
+                value={inputs.username}
+                onChange={handleChange}
                 size={40}
                 className="border-solid border-2 border-white rounded-2xl p-2"
               />
               <input
                 type="password"
                 placeholder="password"
+                value={inputs.password}
+                onChange={handleChange}
                 className="border-solid border-2 border-white rounded-2xl p-2"
               />
 
               <input
                 type="submit"
                 value="Submit"
+                disabled={loading}
                 className="bg-emerald-300 p-3 rounded-3xl w-30 text-black"
               />
             </form>
