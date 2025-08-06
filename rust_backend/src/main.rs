@@ -32,7 +32,8 @@ async fn verify_login(user_data: Json<User>) -> impl Responder {
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         let cors = Cors::default()
-            .allowed_origin("*")
+            .allowed_origin("http://localhost:5173")
+            .allowed_origin("http://localhost:8080")
             .allow_any_method()
             .allow_any_header()
             .max_age(3600);
