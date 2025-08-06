@@ -28,7 +28,7 @@ export default function Login() {
     };
 
     try {
-        const response = await fetch("/api/contact", {
+        const response = await fetch("http://localhost:8081/verify_user", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
