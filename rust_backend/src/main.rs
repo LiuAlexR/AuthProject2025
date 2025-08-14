@@ -1,6 +1,6 @@
-use actix_web::{App, Error, HttpResponse, HttpServer, Responder, get, post, web::Json};
+use actix_web::{App, Error, HttpResponse, HttpServer, Responder, post, web::Json};
 use lib::helpers::database_interface::verify_password_from_database;
-use lib::helpers::math::generate_jwt;
+use lib::helpers::math::{generate_jwt, generate_jwt_based_on_state};
 use lib::services::*;
 
 use actix_cors::Cors;
@@ -24,7 +24,7 @@ async fn verify_login(user_data: Json<User>) -> impl Responder {
     if !is_password_correct {
         HttpResponse::Unauthorized().json("Wrong Password")
     } else {
-        let jwt = generate_jwt().unwrap();
+        let jwt = generate_jwt_based_on_state(true, false).unwrap();
         HttpResponse::Ok().json(jwt)
     }
 }
