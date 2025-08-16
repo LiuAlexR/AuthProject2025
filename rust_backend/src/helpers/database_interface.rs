@@ -114,8 +114,9 @@ pub async fn create_new_user(username: &str, password: &str) -> Result<(), AddUs
     let user_auth_doc = doc! {
         "password": hashed_password,
         "user_id": new_user_id,
-        "2fa_key": "blah",
+        "2fa_key": "blah", 
     };
+    todo!("Put 2fa thingy in");
     let auth: Collection<Document> = database.collection("authentication");
     let _ = match auth.insert_one(user_auth_doc).await {
         Err(_) => return Err(AddUserError::DatabaseLookupError),
