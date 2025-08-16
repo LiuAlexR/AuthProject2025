@@ -1,5 +1,5 @@
 use std::fmt;
-pub enum AddUserError {
+pub enum UserError {
     UserAlreadyExistsError,
     UnableToConnectToDatabaseError,
     DatabaseLookupError,
