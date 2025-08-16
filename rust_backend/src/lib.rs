@@ -4,6 +4,7 @@ pub mod helpers {
 }
 pub mod models;
 pub mod services;
+pub mod errors;
 pub mod tester {
     pub mod printtest {
         // use crate::helpers::math::more_test;

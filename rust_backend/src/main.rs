@@ -5,6 +5,7 @@ use lib::services::*;
 
 use actix_cors::Cors;
 use lib::models::*;
+use tokio::time::{sleep, Duration};
 #[post("/register_user")]
 async fn register_user(user_data: Json<User>) -> impl Responder {
     let key = register_user_service(user_data.into_inner()).await;
@@ -20,36 +21,57 @@ async fn get_code(username: String) -> Result<impl Responder, Error> {
 #[post("/verify_login")]
 async fn verify_login(user_data: Json<User>) -> impl Responder {
     println!("Here!");
-    let is_password_correct: bool = verify_password_from_database(&user_data.username, &user_data.password).await;
+    let is_password_correct: bool = verify_password_from_database(1, &user_data.password).await;
     if !is_password_correct {
         HttpResponse::Unauthorized().json("Wrong Password")
     } else {
-        let jwt = generate_jwt_based_on_state(true, false).unwrap();
+        let jwt = generate_jwt_based_on_state(1, true, false).unwrap();
         HttpResponse::Ok().json(jwt)
     }
 }
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    println!("Starting!");
-    HttpServer::new(|| {
-        let cors = Cors::default()
-            .allowed_origin("http://localhost:5173")
-            .allowed_origin("http://localhost:8080")
-            .allow_any_method()
-            .allow_any_header()
-            .max_age(3600);
-        App::new()
-            .wrap(cors)
-            .service(register_user)
-            .service(get_code)
-            .service(verify_login)
-    })
-    .bind(("127.0.0.1", 8081))?
-    .run()
-    .await
-}
-// #[tokio::main]
-// async fn main() {
-//     println!("{}", generate_jwt().unwrap());
+// #[actix_web::main]
+// async fn main() -> std::io::Result<()> {
+//     println!("Starting!");
+//     HttpServer::new(|| {
+//         let cors = Cors::default()
+//             .allowed_origin("http://localhost:5173")
+//             .allowed_origin("http://localhost:8080")
+//             .allow_any_method()
+//             .allow_any_header()
+//             .max_age(3600);
+//         App::new()
+//             .wrap(cors)
+//             .service(register_user)
+//             .service(get_code)
+//             .service(verify_login)
+//     })
+//     .bind(("127.0.0.1", 8081))?
+//     .run()
+//     .await
 // }
+#[tokio::main]
+async fn main() {
+//     let data = "{\"password\":\"12345\",\"jwt\":\"1234567\"}";
+//     let result = serde_json::from_str(data);
+//     let request: UserRequest = match result {
+//         Ok(req) => {
+//             req
+//         }
+//         Err(_) => {
+//             let user = UserRequest {
+//                 username: "Error".to_string(),
+//                 password: "Error".to_string(),
+//                 jwt: "wdaq".to_string(),
+//             };
+//             user
+//         }
+            
+//     };
+//     println!("{}", request.username);
+// }
+    let start = std::time::Instant::now();
+    let x = sleep(Duration::from_millis(200)).await;
+    sleep(Duration::from_millis(200)).await;
+    println!("{}", start.elapsed().as_micros() as f64 / 1000.0);
+}

@@ -124,12 +124,13 @@ pub fn generate_jwt() -> Result<String, hmac::digest::InvalidLength> {
     let body = format!("{{\"exp\":{}}}", ms_since_epoch);
     return create_jwt(&header, &body);
 }
-pub fn generate_jwt_based_on_state(is_password_correct: bool, is_2fa_faverified: bool) -> Result<String, hmac::digest::InvalidLength> {
+pub fn generate_jwt_based_on_state(user_id: i32, is_password_correct: bool, is_2fa_faverified: bool) -> Result<String, hmac::digest::InvalidLength> {
     // let secret =  "a-string-secret-at-least-256-bits-long";
+    let padded_id: String = format!("{:0>8}", user_id);
     let header = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
     let current_time = SystemTime::now();
     let ms_since_epoch = current_time.duration_since(UNIX_EPOCH).expect("Time should go forward!").as_millis() + 1800000;
-    let body = format!("{{\"exp\":{},\"pass\":{},\"2fa\":{}}}", ms_since_epoch, is_password_correct, is_2fa_faverified);
+    let body = format!("{{\"exp\":{},\"user\":\"{}\",\"pass\":{},\"2fa\":{}}}", ms_since_epoch, padded_id, is_password_correct, is_2fa_faverified);
     return create_jwt(&header, &body);
 }
 // todo!("Talk about whether or not to make stateless https://medium.com/@byeduardoac/managing-jwt-token-expiration-bfb2bd6ea584 says should be stateless, but just storing expiration is simpler");

@@ -1,14 +1,20 @@
-use crate::helpers::math::{hash, verify_password};
-use mongodb::{Client, Collection, bson::Document, bson::doc};
-
+use crate::{errors::AddUserError, helpers::math::{hash, verify_password}};
+use mongodb::{bson::{doc, Document}, Client, Collection};
 
 const URI: &str = "mongodb://localhost:27017/";
-pub async fn get_user_password(username: &str) -> mongodb::error::Result<Option<Document>> {
+pub async fn get_user_id_from_username(username: &str) -> mongodb::error::Result<Option<Document>> {
+    let client = Client::with_uri_str(URI).await?;
+    let database = client.database("Life360");
+    let my_coll: Collection<Document> = database.collection("users");
+    let found = my_coll.find_one(doc! { "username": username }).await?;
+    Ok(found)
+}
+pub async fn get_user_password(user_id: i32) -> mongodb::error::Result<Option<Document>> {
     // Create a new client and connect to the server
     let client = Client::with_uri_str(URI).await?;
     let database = client.database("Life360");
     let my_coll: Collection<Document> = database.collection("authentication");
-    let found = my_coll.find_one(doc! { "username": username }).await?;
+    let found = my_coll.find_one(doc! { "user_id": user_id }).await?;
 
     Ok(found)
 }
@@ -29,8 +35,8 @@ pub async fn update_password(
 
     Ok(result)
 }
-pub async fn verify_password_from_database(username: &str, password: &str) -> bool {
-    let the_pass = get_user_password(username).await;
+pub async fn verify_password_from_database(user_id: i32, password: &str) -> bool {
+    let the_pass = get_user_password(user_id).await;
     //Parses the password. the_pass is a result, so we need to cover Ok(some), Ok(none), and the error. Since we are validating, the Ok(none) and the Error can both return false
     match the_pass {
         Ok(Some(result)) => match result.get_str("password") {
@@ -58,29 +64,40 @@ pub async fn get_max_id() -> Result<i32, mongodb::error::Error> {
     }
 }
 
-pub async fn create_new_user(username: &str, password: &str) -> Result<(), mongodb::error::Error> {
-    let client = Client::with_uri_str(URI).await?;
+pub async fn create_new_user(username: &str, password: &str) -> Result<(), AddUserError> {
+    let client = match Client::with_uri_str(URI).await {
+        Ok(connection) => connection,
+        Err(_) => {
+            return Err(AddUserError::UnableToConnectToDatabaseError);
+        },
+    };
     let database = client.database("Life360");
-    let collection: Collection<Document> = database.collection("authentication");
+    let collection: Collection<Document> = database.collection("users");
 
     // First, check if the user already exists
-    if collection
-        .find_one(doc! { "username": username })
-        .await?
-        .is_some()
+    let user_exists = match collection.find_one(doc! { "username": username } ).await {
+        Ok(success) => success,
+        Err(_) => {
+            return Err(AddUserError::DatabaseLookupError);
+        },
+    };
+    if user_exists.is_some()
     {
         println!("User already exists!");
-        return Ok(()); // or return an error, depending on your design
+        return Err(AddUserError::UserAlreadyExistsError); // or return an error, depending on your design
     }
 
     // Hash the password
     let hashed_password = hash(password);
 
     // Get the next user_id
-    let max_id_doc = collection
+    let max_id_doc = match collection
         .find_one(doc! {})
         .sort(doc! {"user_id": -1})
-        .await?;
+        .await {
+            Ok(success) => success,
+            Err(_) => return Err(AddUserError::DatabaseLookupError),
+        };
 
     let new_user_id = match max_id_doc {
         Some(doc) => doc.get_i32("user_id").unwrap_or(0) + 1,
@@ -90,11 +107,24 @@ pub async fn create_new_user(username: &str, password: &str) -> Result<(), mongo
     // Insert new user document
     let new_user = doc! {
         "username": username,
-        "password": hashed_password,
         "user_id": new_user_id,
     };
 
-    collection.insert_one(new_user).await?;
+    let insert_user_waiter = collection.insert_one(new_user);
+    let user_auth_doc = doc! {
+        "password": hashed_password,
+        "user_id": new_user_id,
+        "2fa_key": "blah",
+    };
+    let auth: Collection<Document> = database.collection("authentication");
+    let _ = match auth.insert_one(user_auth_doc).await {
+        Err(_) => return Err(AddUserError::DatabaseLookupError),
+        _ => (),
+    };
+    let _ = match insert_user_waiter.await {
+        Err(_) => return Err(AddUserError::DatabaseLookupError),
+        _ => (),
+    };
     println!("User created!");
     Ok(())
 }
