@@ -7,18 +7,18 @@ pub struct User {
 }
 
 #[derive(Deserialize)]
-pub struct UserWithKey {
+pub struct UserWithKey { //not in use
     pub username: String,
     pub secret_key: String,
 }
 #[derive(Deserialize)]
-pub struct UserRequest {
+pub struct UserRequest { //not in use
     pub username: String,
     pub password: String,
     pub jwt: String,
 }
 #[derive(Deserialize)]
 pub struct MFARequest {
-    pub username: String,
+    pub jwt: String,
     pub password: String,
 }

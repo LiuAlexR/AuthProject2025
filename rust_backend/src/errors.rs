@@ -22,3 +22,27 @@ impl fmt::Display for DatabaseLookupError {
         write!(f, "Error reading from database!")
     }
 }
+
+pub enum JWTError {
+    InvalidSignatureError,
+    HashingError,
+    JWTFormattingError,
+}
+pub struct InvalidSignatureError;
+impl fmt::Display for InvalidSignatureError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Signature is invalid!")
+    }
+}
+pub struct HashingError;
+impl fmt::Display for HashingError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Error hashing jwt!")
+    }
+}
+pub struct JWTFormattingError;
+impl fmt::Display for JWTFormattingError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Error parsing JWT!")
+    }
+}

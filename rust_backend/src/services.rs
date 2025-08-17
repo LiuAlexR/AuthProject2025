@@ -13,8 +13,8 @@ pub async fn register_user_service(user_data: User) -> String {
     return s;
 }
 
-pub async fn get_totp_codes_service(username: &str) -> Result<Vec<u32>, Error> {
-    let doc = get_secret_key_typed(username)
+pub async fn get_totp_codes_service(user_id: i32) -> Result<Vec<u32>, Error> {
+    let doc = get_secret_key_typed(user_id)
         .await
         .map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
 

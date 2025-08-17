@@ -8,6 +8,8 @@ use sha1::{ Sha1};
 use sha2::Sha256;
 use base64::{engine::general_purpose::URL_SAFE, Engine as _};
 
+use crate::errors::JWTError;
+
 pub fn hash(password: &str) -> String {
     //Hashes the password
     let the_hash = bcrypt::hash(password, 12);
@@ -86,37 +88,57 @@ pub fn create_secret_key() -> String {
     BASE32.encode(test.as_bytes())
 }
 /// This should not be called by itself. All implementations should be called with other functions. Or do. I don't care
-fn create_jwt(header: &str, body: &str) -> Result<String, hmac::digest::InvalidLength> {
+fn create_jwt(header: &str, body: &str) -> Result<String, JWTError> {
     let secret = "a-string-secret-at-least-256-bits-long";
     // Cleans the inputs by removing newlines and spaces
     let header_token: String = URL_SAFE.encode(header.replace(" ", "").replace("\n", ""));
     let body_token: String = URL_SAFE.encode(body.replace(" ", "").replace("\n", ""));
     let combined = format!("{}.{}", header_token, body_token);
     type HmacSha256 = Hmac<Sha256>;
-    let mut hashed_body = HmacSha256::new_from_slice(secret.as_bytes())?;
+    let mut hashed_body = match HmacSha256::new_from_slice(secret.as_bytes()) {
+        Ok(success) => success,
+        Err(_) => return Err(JWTError::HashingError),
+    };
     hashed_body.update(combined.as_bytes());
     let result = hashed_body.finalize().into_bytes();
     let final_token = format!("{}.{}", combined, URL_SAFE.encode(result));
     return Ok(final_token);
 }
-/// Only verifies whether or not the secret can encrypt the payload. Does not check validity of body
-pub fn verify_jwt_signature(token: &str) -> Result<bool, hmac::digest::InvalidLength> {
+/// Returns an invalid signature error if the signature is invalid, and returns true if the token is not expired, and false otherwise
+pub fn verify_jwt_signature(token: &str) -> Result<bool, JWTError> {
     let secret = "a-string-secret-at-least-256-bits-long";
     let mut split_token = token.split(".");
-    let head_body = format!("{}.{}", split_token.next().unwrap(), split_token.next().unwrap());
+    let head = match split_token.next() {
+        Some(success) => success,
+        None => return Err(JWTError::JWTFormattingError),
+    };
+    let body = match split_token.next() {
+        Some(success) => success,
+        None => return Err(JWTError::JWTFormattingError),
+    };
+    
+    let head_body = format!("{}.{}", head, body);
     type HmacSha256 = Hmac<Sha256>;
-    let mut hashed_body = HmacSha256::new_from_slice(secret.as_bytes())?;
+    let mut hashed_body = match HmacSha256::new_from_slice(secret.as_bytes()) {
+        Ok(success) => success,
+        Err(_) => return Err(JWTError::HashingError),
+    };
     hashed_body.update(head_body.as_bytes());
     let result = hashed_body.finalize().into_bytes();
     let final_token = format!("{}.{}", head_body, URL_SAFE.encode(result));
-    if token == final_token {
-        return Ok(true);
-    } else {
-        return Ok(false);
+    if token != final_token {
+        return Err(JWTError::InvalidSignatureError);
     }
+    let decoded_body = match URL_SAFE.decode(body) {
+        Ok(success) => match String::from_utf8(success) {
+            Ok(decoded) => decoded,
+            Err(_) => return Err(JWTError::JWTFormattingError),
+        },
+        Err(_) => return Err(JWTError::HashingError),
+    };
 }
 /// Generates a jwt with a predefined header and a expiration time (exp) of 30 minutes after the current time, in ms after epooch
-pub fn generate_jwt() -> Result<String, hmac::digest::InvalidLength> {
+pub fn generate_jwt() -> Result<String, JWTError> {
     // let secret =  "a-string-secret-at-least-256-bits-long";
     let header = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
     let current_time = SystemTime::now();
@@ -124,7 +146,7 @@ pub fn generate_jwt() -> Result<String, hmac::digest::InvalidLength> {
     let body = format!("{{\"exp\":{}}}", ms_since_epoch);
     return create_jwt(&header, &body);
 }
-pub fn generate_jwt_based_on_state(user_id: i32, is_password_correct: bool, is_2fa_faverified: bool) -> Result<String, hmac::digest::InvalidLength> {
+pub fn generate_jwt_based_on_state(user_id: i32, is_password_correct: bool, is_2fa_faverified: bool) -> Result<String, JWTError> {
     // let secret =  "a-string-secret-at-least-256-bits-long";
     let padded_id: String = format!("{:0>8}", user_id);
     let header = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";

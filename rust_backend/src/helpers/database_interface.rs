@@ -150,14 +150,14 @@ pub async fn add_secret_key(username: &str, key: &str) -> Result<(), mongodb::er
     Ok(())
 }
 
-pub async fn get_secret_key_typed(username: &str) -> Result<Document, mongodb::error::Error> {
+pub async fn get_secret_key_typed(user_id: i32) -> Result<Document, mongodb::error::Error> {
     let client = Client::with_uri_str(URI).await?;
     let database = client.database("Life360");
-    let collection: Collection<Document> = database.collection("keys");
+    let collection: Collection<Document> = database.collection("authentication");
 
     let doc: Document = collection
         .find_one(doc! {
-            "username": username,
+            "user_id": user_id,
         })
         .await?
         .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "User not found"))?;

@@ -1,5 +1,5 @@
 use actix_web::{App, Error, HttpResponse, HttpServer, Responder, post, web::Json};
-use lib::helpers::database_interface::verify_password_from_database;
+use lib::helpers::database_interface::{get_user_id_from_username, verify_password_from_database};
 use lib::helpers::math::{generate_jwt, generate_jwt_based_on_state};
 use lib::services::*;
 
@@ -13,10 +13,24 @@ async fn register_user(user_data: Json<User>) -> impl Responder {
 }
 
 #[post("/get_codes")]
-async fn get_code(username: String) -> Result<impl Responder, Error> {
-    let codes = get_totp_codes_service(&username).await?;
+async fn get_code(username: String) -> impl Responder {
+    let user_id_option = get_user_id_from_username(&username).await;
+    let user_id = match user_id_option {
+        Ok(success) => match success {
+            Some(the_document) => match the_document.get_i32("user_id") {
+                Ok(the_id) => the_id,
+                Err(_) => return HttpResponse::InternalServerError().json("Failed to get the user ID"),
+            },
+            None => todo!(),
+        },
+        Err(_) => return HttpResponse::InternalServerError().json("Failed to get the user ID"),
+    };
+    let codes = match get_totp_codes_service(user_id).await {
+        Ok(the_result) => the_result,
+        Err(_) => return HttpResponse::InternalServerError().json("Failed to get the user ID")
+    };
 
-    Ok(HttpResponse::Ok().json(codes))
+    HttpResponse::Ok().json(codes)
 }
 #[post("/verify_login")]
 async fn verify_login(user_data: Json<User>) -> impl Responder {
@@ -30,6 +44,29 @@ async fn verify_login(user_data: Json<User>) -> impl Responder {
     }
 }
 
+#[post("/verify_login_password")]
+async fn verify_login_password(user_data: Json<User>) -> impl Responder {
+    println!("Here!");
+    let is_password_correct: bool = verify_password_from_database(1, &user_data.password).await;
+    if !is_password_correct {
+        HttpResponse::Unauthorized().json("Wrong Password")
+    } else {
+        let jwt = generate_jwt_based_on_state(1, true, false).unwrap();
+        HttpResponse::Ok().json(jwt)
+    }
+}
+
+#[post("/verify_login_2fa")]
+async fn verify_login_2fa(user_data: Json<MFARequest>) -> impl Responder {
+    println!("Here!");
+    let is_password_correct: bool = verify_password_from_database(1, &user_data.password).await;
+    if !is_password_correct {
+        HttpResponse::Unauthorized().json("Wrong Password")
+    } else {
+        let jwt = generate_jwt_based_on_state(1, true, false).unwrap();
+        HttpResponse::Ok().json(jwt)
+    }
+}
 // #[actix_web::main]
 // async fn main() -> std::io::Result<()> {
 //     println!("Starting!");
