@@ -1,5 +1,17 @@
-use crate::{errors::UserError, helpers::math::{hash, verify_password}};
-use mongodb::{bson::{doc, Document}, Client, Collection};
+use base32;
+use base64::{Engine as _, engine::general_purpose::URL_SAFE};
+use bcrypt;
+use data_encoding::BASE32;
+use rand::prelude::*;
+
+use crate::{
+    errors::UserError,
+    helpers::math::{hash, verify_password},
+};
+use mongodb::{
+    Client, Collection,
+    bson::{Document, doc},
+};
 
 const URI: &str = "mongodb://localhost:27017/";
 pub async fn get_user_id_from_username(username: &str) -> Result<Option<Document>, UserError> {
@@ -9,7 +21,7 @@ pub async fn get_user_id_from_username(username: &str) -> Result<Option<Document
     };
     let database = client.database("Life360");
     let my_coll: Collection<Document> = database.collection("users");
-    let found = match my_coll.find_one(doc! { "username": username }).await{
+    let found = match my_coll.find_one(doc! { "username": username }).await {
         Ok(document) => document,
         Err(_) => return Err(UserError::DatabaseLookupError),
     };
@@ -75,20 +87,19 @@ pub async fn create_new_user(username: &str, password: &str) -> Result<(), UserE
         Ok(connection) => connection,
         Err(_) => {
             return Err(UserError::UnableToConnectToDatabaseError);
-        },
+        }
     };
     let database = client.database("Life360");
     let collection: Collection<Document> = database.collection("users");
 
     // First, check if the user already exists
-    let user_exists = match collection.find_one(doc! { "username": username } ).await {
+    let user_exists = match collection.find_one(doc! { "username": username }).await {
         Ok(success) => success,
         Err(_) => {
             return Err(UserError::DatabaseLookupError);
-        },
+        }
     };
-    if user_exists.is_some()
-    {
+    if user_exists.is_some() {
         println!("User already exists!");
         return Err(UserError::UserAlreadyExistsError); // or return an error, depending on your design
     }
@@ -100,10 +111,11 @@ pub async fn create_new_user(username: &str, password: &str) -> Result<(), UserE
     let max_id_doc = match collection
         .find_one(doc! {})
         .sort(doc! {"user_id": -1})
-        .await {
-            Ok(success) => success,
-            Err(_) => return Err(UserError::DatabaseLookupError),
-        };
+        .await
+    {
+        Ok(success) => success,
+        Err(_) => return Err(UserError::DatabaseLookupError),
+    };
 
     let new_user_id = match max_id_doc {
         Some(doc) => doc.get_i32("user_id").unwrap_or(0) + 1,
@@ -163,4 +175,17 @@ pub async fn get_secret_key_typed(user_id: i32) -> Result<Document, mongodb::err
         .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "User not found"))?;
 
     Ok(doc)
+}
+pub fn create_secret_key() -> String {
+    const MAX: u32 = 30;
+    let mut key = String::from("");
+    let mut rng = rand::rng();
+
+    for _ in 0..MAX {
+        key.push(rng.random::<char>())
+    }
+
+    // let test = "LEBRON JAMES";
+
+    BASE32.encode(key.as_bytes())
 }
