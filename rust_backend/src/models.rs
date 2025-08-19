@@ -20,5 +20,12 @@ pub struct UserRequest { //not in use
 #[derive(Deserialize)]
 pub struct MFARequest {
     pub jwt: String,
-    pub password: String,
+    pub password: u32,
+}
+#[derive(Deserialize)]
+pub struct JWTModel {
+    pub exp: u128,
+    pub user: i32,
+    pub pass: bool,
+    pub twofa: bool,
 }

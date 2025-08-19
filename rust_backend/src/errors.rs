@@ -28,6 +28,11 @@ pub enum JWTError {
     HashingError,
     JWTFormattingError,
 }
+impl std::fmt::Display for JWTError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "JWT Error!")
+    }
+}
 pub struct InvalidSignatureError;
 impl fmt::Display for InvalidSignatureError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

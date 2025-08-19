@@ -1,6 +1,5 @@
-use base32;
-use base64::{Engine as _, engine::general_purpose::URL_SAFE};
-use bcrypt;
+
+
 use data_encoding::BASE32;
 use rand::prelude::*;
 
@@ -132,7 +131,7 @@ pub async fn create_new_user(username: &str, password: &str) -> Result<(), UserE
     let user_auth_doc = doc! {
         "password": hashed_password,
         "user_id": new_user_id,
-        "2fa_key": "blah", //todo fix this
+        "2fa_key": create_secret_key(), //todo fix this
     };
     let auth: Collection<Document> = database.collection("authentication");
     let _ = match auth.insert_one(user_auth_doc).await {
@@ -150,7 +149,7 @@ pub async fn create_new_user(username: &str, password: &str) -> Result<(), UserE
 pub async fn add_secret_key(username: &str, key: &str) -> Result<(), mongodb::error::Error> {
     let client = Client::with_uri_str(URI).await?;
     let database = client.database("Life360");
-    let collection: Collection<Document> = database.collection("keys");
+    let collection: Collection<Document> = database.collection("authenti");
 
     let new_key = doc! {
         "username": username,

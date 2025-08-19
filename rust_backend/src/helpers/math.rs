@@ -2,13 +2,13 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use base32;
 use bcrypt;
-use data_encoding::BASE32;
+// use data_encoding::BASE32;
 use hmac::{Hmac, Mac};
 use sha1::{ Sha1};
 use sha2::Sha256;
 use base64::{engine::general_purpose::URL_SAFE, Engine as _};
 
-use crate::errors::JWTError;
+use crate::{errors::JWTError, models::JWTModel};
 
 pub fn hash(password: &str) -> String {
     //Hashes the password
@@ -82,11 +82,11 @@ pub fn create_one_time_password(
     Ok(bin_code % 1_000_000)
 }
 
-pub fn create_secret_key() -> String {
-    let test = "LEBRON JAMES";
+// pub fn create_secret_key() -> String {
+//     let test = "LEBRON JAMES";
 
-    BASE32.encode(test.as_bytes())
-}
+//     BASE32.encode(test.as_bytes())
+// }
 /// This should not be called by itself. All implementations should be called with other functions. Or do. I don't care
 fn create_jwt(header: &str, body: &str) -> Result<String, JWTError> {
     let secret = "a-string-secret-at-least-256-bits-long";
@@ -104,8 +104,8 @@ fn create_jwt(header: &str, body: &str) -> Result<String, JWTError> {
     let final_token = format!("{}.{}", combined, URL_SAFE.encode(result));
     return Ok(final_token);
 }
-/// Returns an invalid signature error if the signature is invalid, and returns true if the token is not expired, and false otherwise
-pub fn verify_jwt_signature(token: &str) -> Result<bool, JWTError> {
+/// Returns an invalid signature error if the signature is invalid, and returns 0 if the signature is expired, and returns the user id if otherwise
+pub fn verify_jwt_signature(token: &str) -> Result<i32, JWTError> {
     let secret = "a-string-secret-at-least-256-bits-long";
     let mut split_token = token.split(".");
     let head = match split_token.next() {
@@ -136,6 +136,59 @@ pub fn verify_jwt_signature(token: &str) -> Result<bool, JWTError> {
         },
         Err(_) => return Err(JWTError::HashingError),
     };
+    let result: Result<JWTModel, serde_json::Error> = serde_json::from_str(&decoded_body);
+    let request: JWTModel = match result {
+        Ok(req) => {
+            req
+        }
+        Err(_) => {
+            return Err(JWTError::HashingError);
+        }
+            
+    };
+    let current_time = SystemTime::now();
+    let ms_since_epoch = current_time.duration_since(UNIX_EPOCH).expect("Time should go forward!").as_millis();
+    if request.exp < ms_since_epoch {
+        return Ok(0);
+    }
+    return Ok(request.user);
+}
+/// Parses the JWT to see the current login state. Returns 0 if the user is not logged in, 1 if the JWT shows that the password is valid, and 2 if the JWT shows that the MFA is valid
+pub fn parse_jwt_signature(token: &str) -> Result<u8, JWTError> { 
+    let mut split_token = token.split(".");
+    let _head = match split_token.next() {
+        Some(success) => success,
+        None => return Err(JWTError::JWTFormattingError),
+    };
+    let body = match split_token.next() {
+        Some(success) => success,
+        None => return Err(JWTError::JWTFormattingError),
+    };
+    let decoded_body = match URL_SAFE.decode(body) {
+        Ok(success) => match String::from_utf8(success) {
+            Ok(decoded) => decoded,
+            Err(_) => return Err(JWTError::JWTFormattingError),
+        },
+        Err(_) => return Err(JWTError::HashingError),
+    };
+    let result: Result<JWTModel, serde_json::Error> = serde_json::from_str(&decoded_body);
+    let request: JWTModel = match result {
+        Ok(req) => {
+            req
+        }
+        Err(_) => {
+            return Err(JWTError::HashingError);
+        }
+            
+    };
+    if request.pass {
+        if request.twofa {
+            return Ok(2);
+        }
+        return Ok(1);
+    }
+    return Ok(0);
+    
 }
 /// Generates a jwt with a predefined header and a expiration time (exp) of 30 minutes after the current time, in ms after epooch
 pub fn generate_jwt() -> Result<String, JWTError> {
@@ -148,11 +201,10 @@ pub fn generate_jwt() -> Result<String, JWTError> {
 }
 pub fn generate_jwt_based_on_state(user_id: i32, is_password_correct: bool, is_2fa_faverified: bool) -> Result<String, JWTError> {
     // let secret =  "a-string-secret-at-least-256-bits-long";
-    let padded_id: String = format!("{:0>8}", user_id);
     let header = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}";
     let current_time = SystemTime::now();
     let ms_since_epoch = current_time.duration_since(UNIX_EPOCH).expect("Time should go forward!").as_millis() + 1800000;
-    let body = format!("{{\"exp\":{},\"user\":\"{}\",\"pass\":{},\"2fa\":{}}}", ms_since_epoch, padded_id, is_password_correct, is_2fa_faverified);
+    let body = format!("{{\"exp\":{},\"user\":{},\"pass\":{},\"twofa\":{}}}", ms_since_epoch, user_id, is_password_correct, is_2fa_faverified);
     return create_jwt(&header, &body);
 }
 // todo!("Talk about whether or not to make stateless https://medium.com/@byeduardoac/managing-jwt-token-expiration-bfb2bd6ea584 says should be stateless, but just storing expiration is simpler");
