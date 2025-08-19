@@ -6,7 +6,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 pub async fn register_user_service(user_data: User) -> String {
     let _ = create_new_user(&user_data.username, &user_data.password).await;
-    todo!("Fix this");
+    // todo!("Fix this");
     let s = create_secret_key();
     let _ = add_secret_key(&user_data.username, &s).await;
 
