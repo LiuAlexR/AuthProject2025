@@ -5,13 +5,17 @@ import waves from "../../assets/layered-waves-haikei.png";
 
 export default function DisplayQR() {
   const key: string = useLocation().state.key;
+  console.log(key);
+  const email: string = useLocation().state.user;
+  console.log("EMAIL: " + email);
   const [value, setValue] = useState<string>("");
   const [show, setShow] = useState<boolean>(false);
 
-  const [code, setCode] = useState<number>(0);
+  const [code, setCode] = useState<number[]>([]);
   const PINK: string = "#f1b6d2";
 
   async function get_code(username: string) {
+    console.log("payload: " + username);
     const payload: string = username;
 
     const response = await fetch("http://localhost:8081/get_codes", {
@@ -23,6 +27,7 @@ export default function DisplayQR() {
     const data = await response.json();
     console.log("Code");
     console.log(data);
+    setCode(data);
   }
 
   function generateQRCode(key: string) {
@@ -45,19 +50,23 @@ export default function DisplayQR() {
   }, []);
 
   useEffect(() => {
-    get_code("USERNAME");
-  });
+    get_code(email);
+  }, []);
 
   return (
     <div
       className="w-full h-full grid grid-rows-[1fr_8fr_1fr]"
       style={{ backgroundImage: `url(${waves})`, backgroundSize: "cover" }}
     >
-      <div className="row-start-1 flex items-center justify-center mt-6">
+      <div className="row-start-1 flex items-center justify-center mt-6 flex-col">
         <p className="text-white font-extrabold text-5xl">
-          {" "}
           Scan this with Duo!{" "}
         </p>
+        <div className="text-white font-extrabold text-5xl">
+          {code.map((code, idx) => (
+            <p key={idx}> {code} </p>
+          ))}
+        </div>
       </div>
 
       <div className="row-start-2 row-end-2 flex items-center justify-center">

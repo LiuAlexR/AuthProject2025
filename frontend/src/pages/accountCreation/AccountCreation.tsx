@@ -16,6 +16,7 @@ export default function AccountCreation() {
     const password: string = formData.get("password") as string;
 
     const user: User = { username: email, password: password };
+    console.log(user);
 
     const response = await fetch("http://localhost:8081/register_user", {
       method: "POST",
@@ -24,9 +25,9 @@ export default function AccountCreation() {
     });
 
     const data = await response.json();
-    console.log(data);
 
-    nav("/display-qr", { state: { key: data } });
+    console.log("EMAIL WO", email);
+    nav("/display-qr", { state: { key: data, user: email } });
   }
 
   return (

@@ -10,6 +10,9 @@ use lib::services::*;
 use actix_cors::Cors;
 use lib::models::*;
 use tokio::time::{Duration, sleep};
+
+use mongodb::bson::{Document, doc};
+
 #[post("/register_user")]
 async fn register_user(user_data: Json<User>) -> impl Responder {
     let key = register_user_service(user_data.into_inner()).await;
@@ -18,26 +21,37 @@ async fn register_user(user_data: Json<User>) -> impl Responder {
 
 #[post("/get_codes")]
 async fn get_code(username: String) -> impl Responder {
-    let user_id_option = get_user_id_from_username(&username).await;
-    let user_id = match user_id_option {
-        Ok(success) => match success {
-            Some(the_document) => match the_document.get_i32("user_id") {
-                Ok(the_id) => the_id,
-                Err(_) => {
-                    return HttpResponse::InternalServerError().json("Failed to get the user ID");
-                }
-            },
-            None => todo!(),
-        },
+    println!("Username: {:?}", username);
+
+    let user_id_option = match get_user_id_from_username(&username).await {
+        Ok(opt) => opt,
+        Err(_) => {
+            return HttpResponse::InternalServerError().json("DB query failed");
+        }
+    };
+
+    //returning NONE rn
+    let document = match user_id_option {
+        Some(doc) => doc,
+        None => {
+            println!("Bro are we fr");
+            return HttpResponse::InternalServerError().json("are we fr");
+        }
+    };
+
+    let user_id = match document.get_i32("user_id") {
+        Ok(id) => id,
         Err(_) => return HttpResponse::InternalServerError().json("Failed to get the user ID"),
     };
+
     let codes = match get_totp_codes_service(user_id).await {
         Ok(the_result) => the_result,
-        Err(_) => return HttpResponse::InternalServerError().json("Failed to get the user ID"),
+        Err(_) => return HttpResponse::InternalServerError().json("Failed to get the codes"),
     };
 
     HttpResponse::Ok().json(codes)
 }
+
 #[post("/verify_login")]
 async fn verify_login(user_data: Json<User>) -> impl Responder {
     println!("Here!");
@@ -145,7 +159,6 @@ async fn verify_login_2fa(user_data: Json<MFARequest>) -> impl Responder {
 }
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    println!("Starting!");
     HttpServer::new(|| {
         let cors = Cors::default()
             .allowed_origin("http://localhost:5173")
@@ -200,4 +213,3 @@ async fn main() -> std::io::Result<()> {
 //         },
 //     }
 // }
-

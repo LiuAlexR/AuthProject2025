@@ -1,5 +1,3 @@
-
-
 use data_encoding::BASE32;
 use rand::prelude::*;
 
@@ -26,6 +24,7 @@ pub async fn get_user_id_from_username(username: &str) -> Result<Option<Document
     };
     Ok(found)
 }
+
 pub async fn get_user_password(user_id: i32) -> mongodb::error::Result<Option<Document>> {
     // Create a new client and connect to the server
     let client = Client::with_uri_str(URI).await?;
@@ -81,7 +80,11 @@ pub async fn get_max_id() -> Result<i32, mongodb::error::Error> {
     }
 }
 
-pub async fn create_new_user(username: &str, password: &str) -> Result<(), UserError> {
+pub async fn create_new_user(
+    username: &str,
+    password: &str,
+    secret_key: &String,
+) -> Result<(), UserError> {
     let client = match Client::with_uri_str(URI).await {
         Ok(connection) => connection,
         Err(_) => {
@@ -131,7 +134,7 @@ pub async fn create_new_user(username: &str, password: &str) -> Result<(), UserE
     let user_auth_doc = doc! {
         "password": hashed_password,
         "user_id": new_user_id,
-        "2fa_key": create_secret_key(), //todo fix this
+        "2fa_key": secret_key, //todo fix this
     };
     let auth: Collection<Document> = database.collection("authentication");
     let _ = match auth.insert_one(user_auth_doc).await {
