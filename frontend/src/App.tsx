@@ -9,6 +9,8 @@ import Home from "./pages/home/Home";
 import Login from "./pages/login/Login";
 import Transition from "./components/Transition";
 import IntroAnimation from "./components/IntroAnimation";
+import AccountCreation from "./pages/accountCreation/AccountCreation";
+import DisplayQR from "./pages/display-qr/DisplayQR";
 
 function App() {
   return (
@@ -31,6 +33,16 @@ function App() {
             />
 
             <Route path="/auth" element={<QR_Page />} />
+            <Route
+              path="/create-account"
+              element={
+                <Transition page={<AccountCreation />} initialState={false} />
+              }
+            />
+            <Route
+              path="/display-qr"
+              element={<Transition page={<DisplayQR />} initialState={false} />}
+            />
           </Routes>
         </BrowserRouter>
       </div>

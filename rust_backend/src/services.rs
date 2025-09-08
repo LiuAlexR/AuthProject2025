@@ -5,12 +5,11 @@ use actix_web::Error;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub async fn register_user_service(user_data: User) -> String {
-    let _ = create_new_user(&user_data.username, &user_data.password).await;
-    todo!("Fix this");
-    let s = create_secret_key();
-    let _ = add_secret_key(&user_data.username, &s).await;
+    //TODO
+    let secret_key: String = create_secret_key();
+    let _ = create_new_user(&user_data.username, &user_data.password, &secret_key).await;
 
-    return s;
+    return secret_key;
 }
 
 pub async fn get_totp_codes_service(user_id: i32) -> Result<Vec<u32>, Error> {
@@ -19,7 +18,7 @@ pub async fn get_totp_codes_service(user_id: i32) -> Result<Vec<u32>, Error> {
         .map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
 
     let key = doc
-        .get_str("secret_key")
+        .get_str("2fa_key")
         .map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
 
     let current_secs = SystemTime::now()

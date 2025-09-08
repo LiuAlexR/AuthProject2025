@@ -37,7 +37,7 @@ public class WebController {
     @GetMapping("/test")
     public String test() {
         System.out.println("Called");
-        return "Hello World";
+        return "Spring Server";
     }
 
     @CrossOrigin(origins = "*")
