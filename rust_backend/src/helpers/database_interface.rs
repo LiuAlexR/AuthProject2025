@@ -26,6 +26,13 @@ pub async fn get_user_id_from_username(username: &str) -> Result<Option<Document
     };
     Ok(found)
 }
+pub async fn reset_database() -> Result<bool, mongodb::error::Error> {
+    let client = Client::with_uri_str(URI).await?;
+    let database = client.database("Life360");
+    let _deleted = database.drop().await;
+    let _new_user = create_new_user("Bob", "1234").await;
+    return Ok(true);
+}
 pub async fn get_user_password(user_id: i32) -> mongodb::error::Result<Option<Document>> {
     // Create a new client and connect to the server
     let client = Client::with_uri_str(URI).await?;
