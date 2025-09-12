@@ -1,30 +1,35 @@
 package com.example.website_backend.controllers;
 
-import com.example.website_backend.dto.LocationUpdate;
-import com.example.website_backend.models.User;
-import com.example.website_backend.models.UserExposed;
-import com.example.website_backend.services.WebService;
+import java.net.http.HttpClient;
 
 import org.bson.Document;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.Duration;
-import java.util.List;
+import com.example.website_backend.dto.LocationUpdate;
+import com.example.website_backend.models.UserExposed;
+import com.example.website_backend.services.DatabaseService;
+import com.example.website_backend.services.MathService;
+import com.example.website_backend.services.WebService;
 
 @RestController
 @RequestMapping(path = "Webserver/")
 public class WebController {
     HttpClient client = HttpClient.newHttpClient();
-    private final WebService webService;
-
-    public WebController(WebService webService) {
+    private final WebService webService ;
+    private final MathService mathService;
+    private final DatabaseService databaseService;
+    public WebController(WebService webService, MathService mathService, DatabaseService databaseService) {
         this.webService = webService;
+        this.mathService = mathService;
+        this.databaseService = databaseService;
     }
 
 //    @CrossOrigin("origins = *")
@@ -40,39 +45,39 @@ public class WebController {
         return "Spring Server";
     }
 
-    @CrossOrigin(origins = "*")
-    @GetMapping("/saveUser")
-    public String saveUser() {
-        User user = new User();
-        user.setUsername("Lebron");
-        user.setUsersToWatch(new String[]{"Kyrie,Kevin,Russell,Chris,Dwyane"});
-        user.setUsersThatCanWatch(new String[]{"Bronny"});
-        user.setCurrentLocation(new double[]{0.0,100.0});
+    // @CrossOrigin(origins = "*")
+    // @GetMapping("/saveUser")
+    // public String saveUser() {
+    //     User user = new User();
+    //     user.setUsername("Lebron");
+    //     user.setUsersToWatch(new String[]{"Kyrie,Kevin,Russell,Chris,Dwyane"});
+    //     user.setUsersThatCanWatch(new String[]{"Bronny"});
+    //     user.setCurrentLocation(new double[]{0.0,100.0});
 
-        webService.saveUser(user);
+    //     webService.saveUser(user);
 
-        return "Working";
-    }
+    //     return "Working";
+    // }
 
-    @CrossOrigin(origins = "*")
-    @GetMapping("/getUser/{username}")
-    public String getUser(@PathVariable String username) {
-        User user = webService.getUser(username);
-        return user.toString();
-    }
-    @CrossOrigin(origins = "*")
-    @PostMapping("/data")
-    public ResponseEntity<String> receiveLocation(@RequestBody LocationUpdate update) {
-        System.out.println("Data received");
-        webService.receiveLocation(update);
-        return ResponseEntity.ok("Received");
-    }
+    // @CrossOrigin(origins = "*")
+    // @GetMapping("/getUser/{username}")
+    // public String getUser(@PathVariable String username) {
+    //     User user = webService.getUser(username);
+    //     return user.toString();
+    // }
+    // @CrossOrigin(origins = "*")
+    // @PostMapping("/data")
+    // public ResponseEntity<String> receiveLocation(@RequestBody LocationUpdate update) {
+    //     System.out.println("Data received");
+    //     webService.receiveLocation(update);
+    //     return ResponseEntity.ok("Received");
+    // }
     @CrossOrigin(origins = "*")
     @PostMapping("/data/{username}")
     public ResponseEntity<String> receiveLocation(@PathVariable String username, @RequestBody LocationUpdate update) {
         Document auth;
         try {
-            auth = webService.getAuthDocument(username);
+            auth = databaseService.getAuthDocument(username);
         } catch (Exception e) {
             System.out.println("User " + username + " was not found");
             return new ResponseEntity<>("User Not Found", HttpStatus.BAD_REQUEST);
@@ -113,9 +118,9 @@ public class WebController {
             return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    @CrossOrigin(origins = "*")
-    @GetMapping("/getLocation")
-    public List<LocationUpdate> getLocation() {
-        return webService.getLocation();
-    }
+    // @CrossOrigin(origins = "*")
+    // @GetMapping("/getLocation")
+    // public List<LocationUpdate> getLocation() {
+    //     return webService.getLocation();
+    // }
 }

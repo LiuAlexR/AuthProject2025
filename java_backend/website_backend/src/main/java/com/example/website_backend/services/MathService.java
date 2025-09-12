@@ -7,6 +7,8 @@ import java.util.Base64;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.springframework.stereotype.Service;
+@Service
 public class MathService {
     public MathService(){
         

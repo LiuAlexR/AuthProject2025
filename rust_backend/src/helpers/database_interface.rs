@@ -133,7 +133,7 @@ pub async fn create_new_user(
     let user_auth_doc = doc! {
         "password": hashed_password,
         "user_id": new_user_id,
-        "2fa_key": secret_key, //todo fix this
+        "2fa_key": secret_key,
     };
     let auth: Collection<Document> = database.collection("authentication");
     let _ = match auth.insert_one(user_auth_doc).await {
