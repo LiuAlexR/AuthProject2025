@@ -148,6 +148,7 @@ async fn verify_login_2fa(user_data: Json<MFARequest>) -> impl Responder {
         let new_jwt = generate_jwt_based_on_state(user_id, true, true);
         match new_jwt {
             Ok(res) => {
+                // return HttpResponse::Ok().json("What's good cuh");
                 return HttpResponse::Ok().json(res);
             }
             Err(_) => {

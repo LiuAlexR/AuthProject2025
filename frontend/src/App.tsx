@@ -11,6 +11,7 @@ import Transition from "./components/Transition";
 import IntroAnimation from "./components/IntroAnimation";
 import AccountCreation from "./pages/accountCreation/AccountCreation";
 import DisplayQR from "./pages/display-qr/DisplayQR";
+import LoginMFA from "./pages/login/LoginMFA";
 
 function App() {
   return (
@@ -42,6 +43,11 @@ function App() {
             <Route
               path="/display-qr"
               element={<Transition page={<DisplayQR />} initialState={false} />}
+            />
+
+            <Route
+              path="login-mfa"
+              element={<Transition page={<LoginMFA />} initialState={false} />}
             />
           </Routes>
         </BrowserRouter>
