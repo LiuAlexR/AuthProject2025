@@ -1,6 +1,7 @@
 use std::fmt;
 pub enum UserError {
     UserAlreadyExistsError,
+    UserDoesNotExistError,
     UnableToConnectToDatabaseError,
     DatabaseLookupError,
 }
@@ -8,6 +9,12 @@ pub struct UserAlreadyExistsError;
 impl fmt::Display for UserAlreadyExistsError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "The user already exists!")
+    }
+}
+pub struct UserDoesNotExistError;
+impl fmt::Display for UserDoesNotExistError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "The user does not exist!")
     }
 }
 pub struct UnableToConnectToDatabaseError;

@@ -1,8 +1,10 @@
+use std::vec;
+
 use data_encoding::BASE32;
 use rand::prelude::*;
 
 use crate::{
-    errors::UserError,
+    errors::{DatabaseLookupError, UserError},
     helpers::math::{hash, verify_password},
 };
 use mongodb::{
@@ -24,12 +26,21 @@ pub async fn get_user_id_from_username(username: &str) -> Result<Option<Document
     };
     Ok(found)
 }
-pub async fn get_user_password(user_id: i32) -> mongodb::error::Result<Option<Document>> {
-    // Create a new client and connect to the server
-    let client = Client::with_uri_str(URI).await?;
+pub async fn get_user_password(user_id: i32) -> Result<Option<Document>, UserError> {
+    let client = match Client::with_uri_str(URI).await {
+        Ok(success) => success,
+        Err(_) => return Err(UserError::UnableToConnectToDatabaseError),
+    };
     let database = client.database("Life360");
     let my_coll: Collection<Document> = database.collection("authentication");
-    let found = my_coll.find_one(doc! { "user_id": user_id }).await?;
+    let found = match my_coll.find_one(doc! { "user_id": user_id }).await{
+        Ok(val) => {
+            val
+        },
+        Err(_) => {
+            return Err(UserError::DatabaseLookupError);
+        },
+    };
 
     Ok(found)
 }
@@ -144,11 +155,27 @@ pub async fn create_new_user(
         Err(_) => return Err(UserError::DatabaseLookupError),
         _ => (),
     };
+    let user_relations: Collection<Document> = database.collection("relations");
+    let users_that_can_view_self: Vec<i32> = vec![];
+    let users_that_self_can_view: Vec<i32> = vec![];
+    let request_users_that_can_view_self: Vec<i32> = vec![];
+    let request_users_that_self_can_view: Vec<i32> = vec![];
+    let relations_doc = doc! {
+        "user_id": new_user_id,
+        "can_see_me": users_that_can_view_self,
+        "I_can_see": users_that_self_can_view,
+        "r_can_see_me": request_users_that_can_view_self,
+        "r_I_can_see": request_users_that_self_can_view,
+    };
+    let _ = match user_relations.insert_one(relations_doc).await {
+        Err(_) => return Err(UserError::DatabaseLookupError),
+        _ => (),
+    };
     println!("User created!");
     Ok(())
 }
 
-pub async fn add_secret_key(username: &str, key: &str) -> Result<(), mongodb::error::Error> {
+pub async fn add_secret_key(username: &str, key: &str) -> Result<(), mongodb::error::Error> { // Not in use
     let client = Client::with_uri_str(URI).await?;
     let database = client.database("Life360");
     let collection: Collection<Document> = database.collection("authenti");
@@ -189,4 +216,100 @@ pub fn create_secret_key() -> String {
     // let test = "LEBRON JAMES";
 
     BASE32.encode(key.as_bytes())
+}
+pub async fn create_user_watch_request(user_to_watch: i32, user_that_watches: i32) -> Result<bool, UserError> {
+    let client = match Client::with_uri_str(URI).await {
+        Ok(success) => success,
+        Err(_) => return Err(UserError::DatabaseLookupError),
+    };
+    let database = client.database("Life360");
+    let user_relations: Collection<Document> = database.collection("relations");
+    let filter = doc! {
+        "user_id": user_to_watch
+    };
+    let update = doc! {
+        "$push": {
+            "r_can_see_me": user_that_watches,
+        }
+    };
+    let _update_result = match user_relations
+        .update_one(filter, update)
+        .await {
+            Ok(res) => res,
+            Err(_) => {
+                return Err(UserError::UserDoesNotExistError);
+            },
+        };
+    let filter_can_watch = doc! {
+        "user_id": user_that_watches
+    };
+    let update_can_watch = doc! {
+        "$push": {
+            "r_I_can_see": user_to_watch,
+        }
+    };
+    let _update_result_can_watch = match user_relations
+        .update_one(filter_can_watch, update_can_watch)
+        .await {
+            Ok(res) => res,
+            Err(_) => {
+                return Err(UserError::UserDoesNotExistError);
+            },
+        };
+    
+    // let user_to_watch_doc_option: Option<Document> = match user_relations
+    //     .find_one(doc! {
+    //         "user_id": user_to_watch,
+    //     })
+    //     .await {
+    //         Ok(success) => {
+    //             success
+    //         }
+    //         Err(_) => {
+    //             return Err(UserError::DatabaseLookupError);
+    //         },
+    //     };
+    // let user_to_watch_doc = match user_to_watch_doc_option {
+    //     Some(user_document) => user_document,
+    //     None => {
+    //         return Err(UserError::UserDoesNotExistError);
+    //     },
+    // };
+    // user_to_watch_doc.
+    // let user_that_watches_doc_option: Option<Document> = match user_relations
+    //     .find_one(doc! {
+    //         "user_id": user_that_watches,
+    //     })
+    //     .await {
+    //         Ok(success) => {
+    //             success
+    //         }
+    //         Err(_) => {
+    //             return Err(UserError::DatabaseLookupError);
+    //         },
+    //     };
+    // let user_that_watches_doc = match user_that_watches_doc_option {
+    //     Some(user_document) => user_document,
+    //     None => {
+    //         return Err(UserError::UserDoesNotExistError);
+    //     },
+    // };
+    
+    
+    return Ok(true);
+}
+/// Allows some user to view another user
+/// Resets the server. Creates Alice, Bob, and Eve. Alice has a password of 1234, Bob has a password of 12345, Eve has a password of 123456. 
+/// Alice and Bob are capable of viewing each other's location. Alice has a active request to view Eve's location, and Eve has an active request to view Bob's location
+/// Purposely chosen for authentication server, despite concerning user information
+pub async fn reset_database() -> Result<bool, mongodb::error::Error> {
+    let client = Client::with_uri_str(URI).await?;
+    let _database = client.database("Life360").drop();
+    let new_database = client.database("Life360");
+    let _ = create_new_user("Alice", "1234", &create_secret_key()).await;
+    let _ = create_new_user("Bob", "12345", &create_secret_key()).await;
+    let _ = create_new_user("Eve", "123456", &create_secret_key()).await;
+    let user_relations: Collection<Document> = new_database.collection("relations");
+
+    return Ok(true);
 }

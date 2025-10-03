@@ -14,9 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.website_backend.dto.LocationUpdate;
-import com.example.website_backend.models.UserExposed;
-import com.example.website_backend.services.DatabaseService;
-import com.example.website_backend.services.MathService;
 import com.example.website_backend.services.WebService;
 
 @RestController
@@ -24,12 +21,8 @@ import com.example.website_backend.services.WebService;
 public class WebController {
     HttpClient client = HttpClient.newHttpClient();
     private final WebService webService ;
-    private final MathService mathService;
-    private final DatabaseService databaseService;
-    public WebController(WebService webService, MathService mathService, DatabaseService databaseService) {
+    public WebController(WebService webService) {
         this.webService = webService;
-        this.mathService = mathService;
-        this.databaseService = databaseService;
     }
 
 //    @CrossOrigin("origins = *")
@@ -77,7 +70,7 @@ public class WebController {
     public ResponseEntity<String> receiveLocation(@PathVariable String username, @RequestBody LocationUpdate update) {
         Document auth;
         try {
-            auth = databaseService.getAuthDocument(username);
+            auth = webService.getAuthDocument(username);
         } catch (Exception e) {
             System.out.println("User " + username + " was not found");
             return new ResponseEntity<>("User Not Found", HttpStatus.BAD_REQUEST);
@@ -100,23 +93,26 @@ public class WebController {
 
             // String jwt = response.body();
             // System.out.println("Login successful. JWT received: " + jwt);
-
-            UserExposed theUser = new UserExposed(0, 0, 0, 0, 0);
-            theUser.setUser_id((int) auth.get("user_id"));
-            theUser.setDatetime(System.currentTimeMillis());
-            theUser.setLatitude(update.lat);
-            theUser.setLongitude(update.lon);
-            theUser.setAltitude(update.alt);
-
-            webService.saveLocation(theUser.getDocument());
+            webService.updateUser((int) auth.get("user_id"), update);
             
-            System.out.println("Data received and saved for " + username);
+            
             return ResponseEntity.ok("Received");
 
         } catch (Exception e) {
             System.out.println("Error calling authentication service: " + e.getMessage());
             return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+    /**
+     * Handles logic for retrieving a 
+     * @param username
+     * @param update
+     * @return
+     */
+    @CrossOrigin(origins = "*")
+    @PostMapping("/get/{id}")
+    public ResponseEntity<String> get(@PathVariable String id, @RequestBody LocationUpdate update) {
+        return null;
     }
     // @CrossOrigin(origins = "*")
     // @GetMapping("/getLocation")

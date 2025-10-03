@@ -1,18 +1,15 @@
 package com.example.website_backend.services;
 
 import org.bson.Document;
-import org.bson.conversions.Bson;
 import org.springframework.stereotype.Service;
 
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.UpdateOptions;
+import com.example.website_backend.dto.LocationUpdate;
+import com.example.website_backend.models.UserExposed;
 
 @Service
 public class WebService {
+    private final DatabaseService databaseService = new DatabaseService();
+    private final MathService mathService = new MathService();
 //     private final WebRepository webRepository;
 //     private final LocationRepository locationRepository;
 
@@ -48,16 +45,28 @@ public class WebService {
 // //        UserExposed user = new UserExposed(userID, update.lat, update.lon, update.alt, System.currentTimeMillis());
 //         locationRepository.save(update);
 //     }
-    public void saveLocation(Document document){
-        String connectionString = "mongodb://localhost:27017/";
-		MongoClient mongoClient = MongoClients.create(connectionString);
-        MongoDatabase theUsers = mongoClient.getDatabase("Life360");
-        MongoCollection<Document> userLocations = theUsers.getCollection("currentLocation");
-        Bson filter = Filters.eq("user_id", document.get("user_id"));
-        userLocations.updateOne(filter, new Document("$set", document), new UpdateOptions().upsert(true)); //TODO decide whether to upsert
-    }
+    
     // public List<LocationUpdate> getLocation() {
     //     return locationRepository.findTopByOrderByTstDesc(Pageable.ofSize(10));
     // }
+
+    public Document getAuthDocument(String username) throws Exception{
+        var document = databaseService.getAuthDocument(username);
+        if (document == null) {
+            throw new Exception("User not found");
+        }
+        return document;
+    }
+
+    public void updateUser(int userId, LocationUpdate update) {
+        UserExposed theUser = new UserExposed(0, 0, 0, 0, 0);
+            theUser.setUser_id(userId);
+            theUser.setDatetime(System.currentTimeMillis());
+            theUser.setLatitude(update.lat);
+            theUser.setLongitude(update.lon);
+            theUser.setAltitude(update.alt);
+
+            databaseService.saveLocation(theUser.getDocument());
+    }
 
 }

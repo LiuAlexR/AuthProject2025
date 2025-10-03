@@ -45,3 +45,4 @@ pub async fn get_totp_codes_service(user_id: i32) -> Result<Vec<u32>, Error> {
 
     Ok(codes)
 }
+
