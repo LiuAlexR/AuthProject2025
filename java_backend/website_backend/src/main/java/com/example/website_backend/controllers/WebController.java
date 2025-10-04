@@ -3,6 +3,7 @@ package com.example.website_backend.controllers;
 import java.net.http.HttpClient;
 
 import org.bson.Document;
+import org.bson.json.JsonWriterSettings;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.website_backend.dto.LocationUpdate;
+import com.example.website_backend.models.UserExposed;
 import com.example.website_backend.services.WebService;
 
 @RestController
@@ -110,9 +112,13 @@ public class WebController {
      * @return
      */
     @CrossOrigin(origins = "*")
-    @PostMapping("/get/{id}")
-    public ResponseEntity<String> get(@PathVariable String id, @RequestBody LocationUpdate update) {
-        return null;
+    @PostMapping("/get/templocation")
+    public ResponseEntity<String> get() {
+        UserExposed test = new UserExposed(5, 43, -12, 100, 1000000);
+        var x = test.getDocument().toJson(JsonWriterSettings
+                    .builder()
+                    .build());
+        return ResponseEntity.ok(x);
     }
     // @CrossOrigin(origins = "*")
     // @GetMapping("/getLocation")

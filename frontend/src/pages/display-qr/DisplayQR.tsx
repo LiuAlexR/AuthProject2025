@@ -70,7 +70,7 @@ export default function DisplayQR() {
       </div>
 
       <div className="row-start-2 row-end-2 flex items-center justify-center">
-        {show && <QRCodeSVG value={value} size={200} />}
+        {show && <QRCodeSVG value={value} size={500} />}
       </div>
     </div>
   );
