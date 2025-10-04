@@ -1,10 +1,35 @@
-import { useRef, useState, type ChangeEvent } from "react";
+import { useMemo, useRef, useState, type ChangeEvent } from "react";
 import React from "react";
 import { useLocation } from "react-router";
+import { motion } from "motion/react";
 
 interface MFARequest {
   jwt: string;
   password: number;
+}
+
+function useTransitionConfig() {
+  const x = useMemo(
+    () => ({
+      boxShadow: {
+        duration: 2,
+        repeat: Infinity,
+        repeatType: "reverse" as const,
+      },
+    }),
+    [],
+  );
+  return x;
+}
+
+function useHoverConfig(color: string) {
+  return useMemo(
+    () => ({
+      boxShadow: `0 0 40px 30px ${color}`,
+      y: -20,
+    }),
+    [color],
+  );
 }
 
 export default function LoginMFA() {
@@ -65,7 +90,7 @@ export default function LoginMFA() {
       <div />
       <div className="flex items-center justify-evenly">
         {digits.map((digit, idx) => (
-          <input
+          <motion.input
             ref={(el) => (digitRefs[idx] = el)}
             type="text"
             maxLength={1}
@@ -73,6 +98,7 @@ export default function LoginMFA() {
             className="text-center text-5xl h-40 w-40 rounded-3xl bg-white"
             onChange={(e) => changeHandler(e, idx)}
             onKeyDown={(e) => backspaceHandler(e, idx)}
+            transition={useTransitionConfig}
           />
         ))}
 
