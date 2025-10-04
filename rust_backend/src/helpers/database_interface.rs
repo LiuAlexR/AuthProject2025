@@ -217,7 +217,8 @@ pub fn create_secret_key() -> String {
 
     BASE32.encode(key.as_bytes())
 }
-pub async fn create_user_watch_request(user_to_watch: i32, user_that_watches: i32) -> Result<bool, UserError> {
+/// Allows some user to view another user
+pub async fn create_user_watch_request(user_to_watch: i32, user_that_watches: i32) -> Result<u64, UserError> {
     let client = match Client::with_uri_str(URI).await {
         Ok(success) => success,
         Err(_) => return Err(UserError::DatabaseLookupError),
@@ -296,7 +297,7 @@ pub async fn create_user_watch_request(user_to_watch: i32, user_that_watches: i3
     // };
     
     
-    return Ok(true);
+    return Ok(_update_result.modified_count);
 }
 /// Allows some user to view another user
 /// Resets the server. Creates Alice, Bob, and Eve. Alice has a password of 1234, Bob has a password of 12345, Eve has a password of 123456. 
@@ -304,12 +305,12 @@ pub async fn create_user_watch_request(user_to_watch: i32, user_that_watches: i3
 /// Purposely chosen for authentication server, despite concerning user information
 pub async fn reset_database() -> Result<bool, mongodb::error::Error> {
     let client = Client::with_uri_str(URI).await?;
-    let _database = client.database("Life360").drop();
+    let _database = client.database("Life360").drop().await;
     let new_database = client.database("Life360");
     let _ = create_new_user("Alice", "1234", &create_secret_key()).await;
     let _ = create_new_user("Bob", "12345", &create_secret_key()).await;
     let _ = create_new_user("Eve", "123456", &create_secret_key()).await;
-    let user_relations: Collection<Document> = new_database.collection("relations");
+    let _ = create_user_watch_request(3, 1).await;
 
     return Ok(true);
 }
