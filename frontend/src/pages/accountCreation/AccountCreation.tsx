@@ -1,6 +1,6 @@
 import vid from "../../assets/background_video.mp4";
 import { useNavigate } from "react-router";
-import { RustServer } from "../../serverCallsEnum";
+import { RustServer } from "../../Technicals";
 
 interface User {
   username: string;
@@ -27,7 +27,9 @@ export default function AccountCreation() {
 
     const data = await response.json();
 
-    nav("/display-qr", { state: { key: data, user: email } });
+    nav("/display-qr", {
+      state: { key: data, user: email, password: password },
+    });
   }
 
   return (
