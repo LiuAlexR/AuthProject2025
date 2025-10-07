@@ -1,5 +1,6 @@
 import vid from "../../assets/background_video.mp4";
 import { useNavigate } from "react-router";
+import { RustServer } from "../../serverCallsEnum";
 
 interface User {
   username: string;
@@ -14,11 +15,11 @@ export default function AccountCreation() {
     const formData = new FormData(e.currentTarget);
     const email: string = formData.get("email") as string;
     const password: string = formData.get("password") as string;
-
     const user: User = { username: email, password: password };
-    console.log(user);
 
-    const response = await fetch("http://localhost:8081/register_user", {
+    const CONNECTION = RustServer.PORT + RustServer.REGISTER;
+
+    const response = await fetch(CONNECTION, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(user),
@@ -26,7 +27,6 @@ export default function AccountCreation() {
 
     const data = await response.json();
 
-    console.log("EMAIL WO", email);
     nav("/display-qr", { state: { key: data, user: email } });
   }
 

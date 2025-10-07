@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import "./Login.css";
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
+import { RustServer } from "../../serverCallsEnum";
 interface Inputs {
   username: string;
   password: string;
@@ -32,7 +33,9 @@ export default function Login() {
     };
 
     try {
-      const response = await fetch("http://localhost:8081/verify_login", {
+      const CONNECTION = RustServer.PORT + RustServer.LOGIN;
+
+      const response = await fetch(CONNECTION, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -46,8 +49,6 @@ export default function Login() {
         );
       }
       const result = await response.json(); // Parse successful response body
-      console.log(result);
-      console.log("Validated");
 
       // Set success message and clear the form
       setMessage("Your message has been sent successfully!");
@@ -115,9 +116,7 @@ export default function Login() {
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
             Welcome Back
           </h1>
-          <p className="text-white/70 text-lg">
-            Sign in to your account
-          </p>
+          <p className="text-white/70 text-lg">Sign in to your account</p>
         </motion.div>
 
         {/* Login Form */}
@@ -199,7 +198,11 @@ export default function Login() {
                   <motion.div
                     className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
                   />
                   Signing In...
                 </>

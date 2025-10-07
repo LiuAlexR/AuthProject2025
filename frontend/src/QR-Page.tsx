@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import { JavaServer } from "./serverCallsEnum";
 export default function QR_Page() {
   const [value, setValue] = useState<string>("");
   const [show, setShow] = useState<boolean>(false);
@@ -27,8 +28,10 @@ export default function QR_Page() {
 
   async function registerUser() {
     let x: User = { username: "Lebron", password: "idk" };
+    const CONNECTION: string = JavaServer.PORT + JavaServer.REGISTER;
+
     try {
-      const response = await fetch("http://localhost:8080/register_user", {
+      const response = await fetch(CONNECTION, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -36,7 +39,6 @@ export default function QR_Page() {
         body: JSON.stringify(x),
       });
       const data = await response.json();
-      console.log(data);
       generateQRCode(data);
     } catch (error: any) {
       console.log(error.message);

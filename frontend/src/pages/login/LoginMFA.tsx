@@ -2,6 +2,7 @@ import { useRef, useState, useEffect, type ChangeEvent } from "react";
 import React from "react";
 import { useLocation } from "react-router";
 import { motion } from "framer-motion";
+import { RustServer } from "../../serverCallsEnum";
 
 interface MFARequest {
   jwt: string;
@@ -35,9 +36,9 @@ export default function LoginMFA() {
     };
 
     try {
-      console.log("Req: " + req.jwt + "\n" + req.password);
+      const CONNECTION = RustServer.PORT + RustServer.LOGIN_2FA;
 
-      const response = await fetch("http://localhost:8081/verify_login_2fa", {
+      const response = await fetch(CONNECTION, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import { ServerURL } from "./serverCallsEnum";
 import type { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import "leaflet-defaulticon-compatibility";
 import "./App.css";
+import { JavaServer } from "./serverCallsEnum";
 interface LocationUpdate {
   _type: string;
   tid: string;
@@ -25,9 +25,9 @@ export default function Map() {
 
   const getRealTimeData = async () => {
     const URI: string[] = [];
-    URI.push(ServerURL.PORT);
-    URI.push(ServerURL.WEB_SERVER);
-    URI.push(ServerURL.GET_LOCATION);
+    URI.push(JavaServer.PORT);
+    URI.push(JavaServer.WEB_SERVER);
+    URI.push(JavaServer.GET_LOCATION);
 
     try {
       const response = await fetch(URI.join(""));
