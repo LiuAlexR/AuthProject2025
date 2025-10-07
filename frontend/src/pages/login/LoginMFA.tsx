@@ -8,7 +8,6 @@ interface MFARequest {
   password: number;
 }
 
-
 export default function LoginMFA() {
   const jwt: string = useLocation().state.jwt;
   const NUMBERS = RegExp("^[0-9]+$");
@@ -36,6 +35,8 @@ export default function LoginMFA() {
     };
 
     try {
+      console.log("Req: " + req.jwt + "\n" + req.password);
+
       const response = await fetch("http://localhost:8081/verify_login_2fa", {
         method: "POST",
         headers: {
@@ -46,7 +47,9 @@ export default function LoginMFA() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Verification failed. Please try again.");
+        throw new Error(
+          errorData.message || "Verification failed. Please try again.",
+        );
       }
 
       const data = await response.json();
@@ -64,23 +67,18 @@ export default function LoginMFA() {
 
   const changeHandler = (e: ChangeEvent<HTMLInputElement>, idx: number) => {
     const input = e.target.value;
-    
+
     // Allow empty string for deletion
     if (input !== "" && !NUMBERS.test(input)) {
       e.target.value = "";
       return;
     }
-    
+
     const newDigits = [...digits];
     newDigits[idx] = input;
     setDigits(newDigits);
 
-    // Auto-submit when last digit is entered
-    if (idx === 5 && input !== "") {
-      setTimeout(() => {
-        makeRequest();
-      }, 300); // Small delay for better UX
-    } else if (idx < 5 && input !== "") {
+    if (idx < 5 && input !== "") {
       const next = digitRefs.current[idx + 1];
       if (next) {
         next.focus();
@@ -88,7 +86,16 @@ export default function LoginMFA() {
     }
   };
 
-  const backspaceHandler = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+  useEffect(() => {
+    if (digits.length == 6 && digits[5] !== "") {
+      makeRequest();
+    }
+  }, digits);
+
+  const backspaceHandler = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number,
+  ) => {
     if (e.key === "Backspace") {
       const current = digitRefs.current[index];
       if (current && current.value === "" && index !== 0) {
@@ -166,7 +173,9 @@ export default function LoginMFA() {
             {digits.map((digit, idx) => (
               <motion.input
                 key={idx}
-                ref={(el) => { digitRefs.current[idx] = el; }}
+                ref={(el) => {
+                  digitRefs.current[idx] = el;
+                }}
                 type="text"
                 maxLength={1}
                 value={digit}
@@ -175,28 +184,28 @@ export default function LoginMFA() {
                 onKeyDown={(e) => backspaceHandler(e, idx)}
                 placeholder="•"
                 initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                animate={{ 
-                  opacity: 1, 
-                  scale: digit ? 1.1 : 1, 
+                animate={{
+                  opacity: 1,
+                  scale: digit ? 1.1 : 1,
                   y: 0,
-                  boxShadow: digit 
+                  boxShadow: digit
                     ? "0 0 30px rgba(59, 130, 246, 0.5), 0 0 60px rgba(147, 51, 234, 0.3)"
-                    : "0 0 0px rgba(59, 130, 246, 0)"
+                    : "0 0 0px rgba(59, 130, 246, 0)",
                 }}
-                transition={{ 
-                  duration: 0.5, 
+                transition={{
+                  duration: 0.5,
                   delay: idx * 0.1,
                   type: "spring",
                   stiffness: 300,
-                  damping: 20
+                  damping: 20,
                 }}
-                whileHover={{ 
+                whileHover={{
                   scale: 1.05,
-                  boxShadow: "0 0 20px rgba(59, 130, 246, 0.4)"
+                  boxShadow: "0 0 20px rgba(59, 130, 246, 0.4)",
                 }}
-                whileFocus={{ 
+                whileFocus={{
                   scale: 1.1,
-                  boxShadow: "0 0 30px rgba(59, 130, 246, 0.6)"
+                  boxShadow: "0 0 30px rgba(59, 130, 246, 0.6)",
                 }}
               />
             ))}
@@ -232,7 +241,6 @@ export default function LoginMFA() {
               <span className="text-white/80">Verifying code...</span>
             </motion.div>
           )}
-
         </motion.div>
 
         {/* Magical Particles */}
