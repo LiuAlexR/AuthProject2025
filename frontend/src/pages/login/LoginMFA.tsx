@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, type ChangeEvent } from "react";
 import React from "react";
 import { useLocation } from "react-router";
 import { motion } from "framer-motion";
-import { RustServer } from "../../serverCallsEnum";
+import { RustServer } from "../../Technicals";
 
 interface MFARequest {
   jwt: string;
