@@ -155,6 +155,23 @@ pub async fn create_new_user(
         Err(_) => return Err(UserError::DatabaseLookupError),
         _ => (),
     };
+    // current location of a user
+    let user_locations: Collection<Document> = database.collection("locations");
+    let user_location_doc: Document = doc! {
+        "user_id": new_user_id,
+        "latitude": 0f32,
+        "longitude": 0f32,
+        "altitude": 0f32,
+        "timestamp": 0i64,
+
+    };
+    let _ = match user_locations.insert_one(user_location_doc).await {
+        Err(_) => return Err(UserError::DatabaseLookupError),
+        _ => (),
+    };
+    // todo implement this
+    // let user_history: Collection<Document> = database.collection("history");
+    // Stores the relations between users
     let user_relations: Collection<Document> = database.collection("relations");
     let users_that_can_view_self: Vec<i32> = vec![];
     let users_that_self_can_view: Vec<i32> = vec![];
@@ -300,6 +317,90 @@ pub async fn create_user_watch_request(user_to_watch: i32, user_that_watches: i3
     return Ok(_update_result.modified_count);
 }
 /// Allows some user to view another user
+pub async fn resolve_user_watch_request(user_to_watch: i32, user_that_watches: i32) -> Result<u64, UserError> {
+    let client = match Client::with_uri_str(URI).await {
+        Ok(success) => success,
+        Err(_) => return Err(UserError::DatabaseLookupError),
+    };
+    let database = client.database("Life360");
+    let user_relations: Collection<Document> = database.collection("relations");
+    let mut counter:i8 = 0;
+    let filter_r_user_to_watch = doc! {
+        "user_id": user_to_watch
+    };
+    let update_pull_user_that_watches = doc! {
+        "$pull": {
+            "r_can_see_me": user_that_watches,
+        }
+    };
+    let update_pull_user_to_watch_result = match user_relations
+        .update_one(filter_r_user_to_watch, update_pull_user_that_watches)
+        .await {
+            Ok(res) => res,
+            Err(_) => {
+                return Err(UserError::UserDoesNotExistError);
+            },
+        };
+
+    if update_pull_user_to_watch_result.modified_count == 1 {
+        counter = counter + 1;
+    }
+    let filter_r_can_watch = doc! {
+        "user_id": user_that_watches
+    };
+    let update_r_can_watch = doc! {
+        "$pull": {
+            "r_I_can_see": user_to_watch,
+        }
+    };
+    let update_user_can_watch_result = match user_relations
+        .update_one(filter_r_can_watch, update_r_can_watch)
+        .await {
+            Ok(res) => res,
+            Err(_) => {
+                return Err(UserError::UserDoesNotExistError);
+            },
+        };
+    if update_user_can_watch_result.modified_count == 1 {
+        counter = counter + 1;
+    }
+    if counter != 2 {
+        return Err(UserError::DatabaseLookupError);
+    }
+    let update = doc! {
+        "$push": {
+            "can_see_me": user_that_watches,
+        }
+    };
+    let filter_user_to_watch = doc! {
+        "user_id": user_to_watch
+    };
+    let _update_result = match user_relations
+        .update_one(filter_user_to_watch, update)
+        .await {
+            Ok(res) => res,
+            Err(_) => {
+                return Err(UserError::UserDoesNotExistError);
+            },
+        };
+    let filter_can_watch = doc! {
+        "user_id": user_that_watches
+    };
+    let update_can_watch = doc! {
+        "$push": {
+            "I_can_see": user_to_watch,
+        }
+    };
+    let _update_result_can_watch = match user_relations
+        .update_one(filter_can_watch, update_can_watch)
+        .await {
+            Ok(res) => res,
+            Err(_) => {
+                return Err(UserError::UserDoesNotExistError);
+            },
+        };
+    return Ok(_update_result.modified_count);
+}
 /// Resets the server. Creates Alice, Bob, and Eve. Alice has a password of 1234, Bob has a password of 12345, Eve has a password of 123456. 
 /// Alice and Bob are capable of viewing each other's location. Alice has a active request to view Eve's location, and Eve has an active request to view Bob's location
 /// Purposely chosen for authentication server, despite concerning user information
@@ -311,6 +412,7 @@ pub async fn reset_database() -> Result<bool, mongodb::error::Error> {
     let _ = create_new_user("Bob", "12345", &create_secret_key()).await;
     let _ = create_new_user("Eve", "123456", &create_secret_key()).await;
     let _ = create_user_watch_request(3, 1).await;
+    let _ = resolve_user_watch_request(3, 1).await;
 
     return Ok(true);
 }

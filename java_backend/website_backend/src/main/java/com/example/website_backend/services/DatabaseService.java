@@ -28,7 +28,7 @@ public class DatabaseService {
      * @param document
      */
     public void saveLocation(Document document){
-        MongoCollection<Document> userLocations = theUsers.getCollection("currentLocation");
+        MongoCollection<Document> userLocations = theUsers.getCollection("relations");
         Bson filter = Filters.eq("user_id", document.get("user_id"));
         userLocations.updateOne(filter, new Document("", document), new UpdateOptions().upsert(true)); //TODO decide whether to upsert
     }

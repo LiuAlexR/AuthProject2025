@@ -158,26 +158,26 @@ async fn verify_login_2fa(user_data: Json<MFARequest>) -> impl Responder {
     }
     return HttpResponse::Forbidden().json("Login expired");
 }
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
-        let cors = Cors::default()
-            .allowed_origin("http://localhost:5173")
-            .allowed_origin("http://localhost:8080")
-            .allow_any_method()
-            .allow_any_header()
-            .max_age(3600);
-        App::new()
-            .wrap(cors)
-            .service(register_user)
-            .service(get_code)
-            .service(verify_login)
-            .service(verify_login_2fa)
-    })
-    .bind(("127.0.0.1", 8081))?
-    .run()
-    .await
-}
+// #[actix_web::main]
+// async fn main() -> std::io::Result<()> {
+//     HttpServer::new(|| {
+//         let cors = Cors::default()
+//             .allowed_origin("http://localhost:5173")
+//             .allowed_origin("http://localhost:8080")
+//             .allow_any_method()
+//             .allow_any_header()
+//             .max_age(3600);
+//         App::new()
+//             .wrap(cors)
+//             .service(register_user)
+//             .service(get_code)
+//             .service(verify_login)
+//             .service(verify_login_2fa)
+//     })
+//     .bind(("127.0.0.1", 8081))?
+//     .run()
+//     .await
+// }
 // #[tokio::main]
 // async fn main() {
 //     let data = "{\"password\":\"12345\",\"jwt\":\"1234567\"}";
@@ -214,8 +214,8 @@ async fn main() -> std::io::Result<()> {
 //         },
 //     }
 // }
-// #[tokio::main]
-// async fn main() {
-//     println!("Running!");
-//     let _x =reset_database().await;
-// }
+#[tokio::main]
+async fn main() {
+    println!("Running!");
+    let _x =reset_database().await;
+}

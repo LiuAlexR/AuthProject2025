@@ -4,14 +4,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.bson.Document;
-import org.bson.json.JsonWriterSettings;
-public class UserExposed {
+public class UserFetchRequestModel {
     private int user_id;
-    private double latitude;
-    private double longitude;
-    private double altitude;
-    private long timeOfEventMS;
-    public UserExposed(int user_id, double latitude, double longitude, double altitude, long timeOfEventMS) {
+    private String jwt;
+    int[] fetchableIDs;
+
+    public UserFetchRequestModel(int user_id, double latitude, double longitude, double altitude, long timeOfEventMS) {
         this.user_id = user_id;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -56,10 +54,5 @@ public class UserExposed {
     }
     public Document getDocument(){
         return new Document("user_id", user_id).append("latitude", latitude).append("longitude", longitude).append("altitude", altitude).append("unixTime", timeOfEventMS);
-    }
-    public String getJSON(){
-        return this.getDocument().toJson(JsonWriterSettings
-            .builder()
-            .build());
     }
 }
