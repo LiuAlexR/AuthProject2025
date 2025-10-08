@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import "./Login.css";
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
-import { RustServer } from "../../serverCallsEnum";
+import { RustServer } from "../../Technicals";
 interface Inputs {
   username: string;
   password: string;

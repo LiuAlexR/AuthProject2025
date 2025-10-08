@@ -5,7 +5,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import "leaflet-defaulticon-compatibility";
 import "./App.css";
-import { JavaServer } from "./serverCallsEnum";
+import { JavaServer } from "./Technicals";
 interface LocationUpdate {
   _type: string;
   tid: string;
