@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.website_backend.dto.LocationUpdate;
 import com.example.website_backend.models.UserExposed;
+import com.example.website_backend.models.UserFetchRequestModel;
 
 @Service
 public class WebService {
@@ -68,5 +69,24 @@ public class WebService {
 
             databaseService.saveLocation(theUser.getDocument());
     }
-
+    public String parseRequest(UserFetchRequestModel request) {
+        var jwt = request.getJwt();
+        var isValid = mathService.verifyJWTSignature(jwt);
+        if(!isValid && !(jwt.equals("ADMIN"))){
+            return "Error. Invalid JWT token";
+        }
+        String locations = "{";
+        for(var i : request.getFetchableIDs()){
+            var location = databaseService.getLocation(i);
+            if(location == null){
+                continue;
+            }
+            locations = locations + location.toJson() + ", ";
+        }
+        if(locations.indexOf(locations.length()-1) == ' '){
+            locations = locations.substring(0, locations.length()-2);
+        }
+        locations = locations + "}";
+        return locations;
+    }
 }

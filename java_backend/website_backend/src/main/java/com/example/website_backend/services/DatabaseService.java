@@ -32,4 +32,13 @@ public class DatabaseService {
         Bson filter = Filters.eq("user_id", document.get("user_id"));
         userLocations.updateOne(filter, new Document("", document), new UpdateOptions().upsert(true)); //TODO decide whether to upsert
     }
+    /**
+     * Gets a user's location document
+     */
+    public Document getLocation(int user_id) {
+        MongoCollection<Document> userPublic = theUsers.getCollection("locations");
+        // System.out.println(userPublic.insertOne(new Document("test", "three").append("moreTest", "two")));
+        FindIterable<Document> item = userPublic.find(new Document("user_id", user_id));
+        return item.first(); //Will be null if user is not found, handle it then. Users with the same username are enforced to not exist at user creation
+    }
 }
