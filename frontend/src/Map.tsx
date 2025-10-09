@@ -18,6 +18,30 @@ interface LocationUpdate {
   batt: number;
 }
 
+async function requestCurrentData(
+  userID: number,
+  jwt: string,
+  users: number[],
+) {
+  const body = [];
+
+  try {
+    const CONN: string = JavaServer.PORT + JavaServer.GET_OTHERS_LOCATIONS;
+
+    const response = await fetch(CONN, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await response.json();
+  } catch (error: any) {
+    console.log(error);
+  }
+}
+
 export default function Map() {
   const [lastLatitude, setLastLatitude] = useState(-0.09);
   const [lastLongitude, setLastLongitude] = useState<number>(51.505);
