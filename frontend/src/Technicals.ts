@@ -4,7 +4,7 @@ export enum JavaServer {
   GET_LOCATION = "/getLocation",
   REGISTER = "/register_user",
   GET_CODE = "/get_codes",
-    GET_OTHERS_LOCATIONS = "/get",
+  GET_OTHERS_LOCATIONS = "/get",
 }
 
 export enum RustServer {
@@ -15,5 +15,19 @@ export enum RustServer {
 }
 
 export enum QR {
-    VENDOR = "Srikar and Alex's amazing App";
+  VENDOR = "Srikar and Alex's amazing App",
+}
+
+export interface UserFetchRequestModel {
+  user_id: number;
+  jwt: String;
+  fetchableIDs: number[];
+}
+
+export interface UserExposed {
+  user_id: number;
+  latitude: number;
+  longitude: number;
+  altitude: number;
+  timeOfEventMS: number;
 }
