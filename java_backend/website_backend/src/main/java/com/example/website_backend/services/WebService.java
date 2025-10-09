@@ -83,7 +83,7 @@ public class WebService {
             }
             locations = locations + location.toJson() + ", ";
         }
-        if(locations.indexOf(locations.length()-1) == ' '){
+        if(locations.charAt(locations.length()-1) == ' '){
             locations = locations.substring(0, locations.length()-2);
         }
         locations = locations + "}";
