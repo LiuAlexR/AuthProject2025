@@ -1,6 +1,8 @@
 package com.example.website_backend.controllers;
 
 import java.net.http.HttpClient;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bson.Document;
 import org.springframework.http.HttpStatus;
@@ -115,6 +117,14 @@ public class WebController {
     public ResponseEntity<String> get(@RequestBody UserFetchRequestModel model) {
         return ResponseEntity.ok(webService.parseRequest(model));
     }
+
+    @CrossOrigin(origins = "*")
+    @GetMapping("/getAllUserIDs")
+    public List<String> getAllUserIDs() {
+        System.out.println('k');
+        return webService.getAllUserIDs();
+    }
+
     
     // @CrossOrigin(origins = "*")
     // @GetMapping("/getLocation")

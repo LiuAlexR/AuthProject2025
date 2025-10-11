@@ -1,23 +1,35 @@
 package com.example.website_backend.services;
 
+import com.example.website_backend.repositories.WebRepository;
 import org.bson.Document;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.website_backend.dto.LocationUpdate;
 import com.example.website_backend.models.UserExposed;
 import com.example.website_backend.models.UserFetchRequestModel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class WebService {
     private final DatabaseService databaseService = new DatabaseService();
     private final MathService mathService = new MathService();
-//     private final WebRepository webRepository;
+    private WebRepository webRepository;
 //     private final LocationRepository locationRepository;
 
 //     public WebService(WebRepository webRepository, LocationRepository locationRepository) {
 //         this.webRepository = webRepository;
 //         this.locationRepository = locationRepository;
 //     }
+@Autowired
+public WebService(WebRepository webRepository) {
+    this.webRepository = webRepository;
+}
+    public WebService(){}
+
+
 
 //     public void saveUser(User user) {
 //         webRepository.save(user);
@@ -88,5 +100,9 @@ public class WebService {
         }
         locations = locations + "}";
         return locations;
+    }
+
+    public List<String> getAllUserIDs() {
+        return webRepository.findAllIds();
     }
 }

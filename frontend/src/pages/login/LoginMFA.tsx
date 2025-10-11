@@ -3,6 +3,7 @@ import React from "react";
 import { useLocation } from "react-router";
 import { motion } from "framer-motion";
 import { RustServer } from "../../Technicals";
+import { useCookies } from "react-cookie";
 
 interface MFARequest {
   jwt: string;
@@ -10,7 +11,8 @@ interface MFARequest {
 }
 
 export default function LoginMFA() {
-  const jwt: string = useLocation().state.jwt;
+  //  const jwt: string = useLocation().state.jwt;
+  const [cookies, setCookie, removeCookie] = useCookies(["jwt_token"]);
   const NUMBERS = RegExp("^[0-9]+$");
   const [digits, setDigits] = useState<string[]>(Array(6).fill(""));
   const [loading, setLoading] = useState<boolean>(false);
@@ -31,7 +33,7 @@ export default function LoginMFA() {
     setIsError(false);
 
     const req: MFARequest = {
-      jwt: jwt,
+      jwt: cookies["jwt_token"],
       password: Number.parseInt(digits.join("")),
     };
 
@@ -54,7 +56,7 @@ export default function LoginMFA() {
       }
 
       const data = await response.json();
-      console.log(data);
+      setCookie("jwt_token", data);
       setMessage("Verification successful!");
       setIsError(false);
     } catch (error: any) {

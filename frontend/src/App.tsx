@@ -12,46 +12,53 @@ import IntroAnimation from "./components/IntroAnimation";
 import AccountCreation from "./pages/accountCreation/AccountCreation";
 import DisplayQR from "./pages/display-qr/DisplayQR";
 import LoginMFA from "./pages/login/LoginMFA";
+import { CookiesProvider } from "react-cookie";
 
 function App() {
   return (
     <>
-      <div className="w-screen h-screen ">
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<IntroAnimation />} />
-            <Route
-              path="/home"
-              element={<Transition page={<Home />} initialState={true} />}
-            />
-            <Route
-              path="/login"
-              element={<Transition page={<Login />} initialState={false} />}
-            />
-            <Route
-              path="/map"
-              element={<Transition page={<Map />} initialState={false} />}
-            />
+      <CookiesProvider>
+        <div className="w-screen h-screen ">
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<IntroAnimation />} />
+              <Route
+                path="/home"
+                element={<Transition page={<Home />} initialState={true} />}
+              />
+              <Route
+                path="/login"
+                element={<Transition page={<Login />} initialState={false} />}
+              />
+              <Route
+                path="/map"
+                element={<Transition page={<Map />} initialState={false} />}
+              />
 
-            <Route path="/auth" element={<QR_Page />} />
-            <Route
-              path="/create-account"
-              element={
-                <Transition page={<AccountCreation />} initialState={false} />
-              }
-            />
-            <Route
-              path="/display-qr"
-              element={<Transition page={<DisplayQR />} initialState={false} />}
-            />
+              <Route path="/auth" element={<QR_Page />} />
+              <Route
+                path="/create-account"
+                element={
+                  <Transition page={<AccountCreation />} initialState={false} />
+                }
+              />
+              <Route
+                path="/display-qr"
+                element={
+                  <Transition page={<DisplayQR />} initialState={false} />
+                }
+              />
 
-            <Route
-              path="login-mfa"
-              element={<Transition page={<LoginMFA />} initialState={false} />}
-            />
-          </Routes>
-        </BrowserRouter>
-      </div>
+              <Route
+                path="login-mfa"
+                element={
+                  <Transition page={<LoginMFA />} initialState={false} />
+                }
+              />
+            </Routes>
+          </BrowserRouter>
+        </div>
+      </CookiesProvider>
     </>
   );
 }

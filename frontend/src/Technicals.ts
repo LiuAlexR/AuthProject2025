@@ -5,6 +5,7 @@ export enum JavaServer {
   REGISTER = "/register_user",
   GET_CODE = "/get_codes",
   GET_OTHERS_LOCATIONS = "/get",
+  GET_ALL_IDS = "/getAllUserIDs",
 }
 
 export enum RustServer {

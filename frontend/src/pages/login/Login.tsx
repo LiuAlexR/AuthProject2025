@@ -3,11 +3,14 @@ import "./Login.css";
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
 import { RustServer } from "../../Technicals";
+import { useCookies } from "react-cookie";
 interface Inputs {
   username: string;
   password: string;
 }
 export default function Login() {
+  const [cookies, setCookie, removeCookie] = useCookies(["jwt_token"]);
+
   const nav = useNavigate();
   const [inputs, setInputs] = useState<Inputs>({ username: "", password: "" });
   const [loading, setLoading] = useState<boolean>(false);
@@ -49,13 +52,16 @@ export default function Login() {
         );
       }
       const result = await response.json(); // Parse successful response body
+      setCookie("jwt_token", result, {
+        path: "/",
+      });
 
       // Set success message and clear the form
       setMessage("Your message has been sent successfully!");
       setIsError(false);
       setInputs({ username: "", password: "" }); // Clear form fields
 
-      nav("/login-mfa", { state: { jwt: result } });
+      nav("/login-mfa");
     } catch (error: any) {
       console.error("Error submitting form:", error);
       // Set error message

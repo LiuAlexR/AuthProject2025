@@ -5,7 +5,8 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import "leaflet-defaulticon-compatibility";
 import "./App.css";
-import { JavaServer } from "./Technicals";
+import { JavaServer, type UserFetchRequestModel } from "./Technicals";
+import { useCookies } from "react-cookie";
 interface LocationUpdate {
   _type: string;
   tid: string;
@@ -23,11 +24,17 @@ async function requestCurrentData(
   jwt: string,
   users: number[],
 ) {
-  const body = [];
+  const body: UserFetchRequestModel = {
+    user_id: userID,
+    jwt: jwt,
+    fetchableIDs: users,
+  };
 
   try {
-    const CONN: string = JavaServer.PORT + JavaServer.GET_OTHERS_LOCATIONS;
+    const CONN: string =
+      JavaServer.PORT + JavaServer.WEB_SERVER + JavaServer.GET_OTHERS_LOCATIONS;
 
+    console.log(CONN);
     const response = await fetch(CONN, {
       method: "POST",
       headers: {
@@ -45,7 +52,32 @@ async function requestCurrentData(
 export default function Map() {
   const [lastLatitude, setLastLatitude] = useState(-0.09);
   const [lastLongitude, setLastLongitude] = useState<number>(51.505);
+  const [cookie, setCookie, removeCookie] = useCookies(["jwt_token"]);
   let position: LatLngExpression = [lastLatitude, lastLongitude];
+  const [ids, setIds] = useState<String[]>([]);
+
+  const getId = async () => {
+    try {
+      const CONN: string =
+        JavaServer.PORT + JavaServer.WEB_SERVER + JavaServer.GET_ALL_IDS;
+
+      const response = await fetch(CONN, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data: String[] = await response.json();
+      setIds(data);
+    } catch (error: any) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getId();
+  }, []);
 
   const getRealTimeData = async () => {
     const URI: string[] = [];
@@ -122,6 +154,10 @@ export default function Map() {
     return null;
   }
 
+  const print = () => {
+    console.log(ids);
+  };
+
   return (
     <>
       <div>
@@ -148,6 +184,7 @@ export default function Map() {
         </button>
 
         <button onClick={getRealTimeData}>Longitude is {lastLongitude}</button>
+        <button onClick={print}>Hello Wolrd</button>
       </div>
     </>
   );

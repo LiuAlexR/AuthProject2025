@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { useLocation } from "react-router";
 import { motion } from "framer-motion";
+import { QR } from "../../Technicals";
 
 export default function DisplayQR() {
   const key: string = useLocation().state.key;
@@ -10,7 +11,7 @@ export default function DisplayQR() {
 
   const generateQRCode = useMemo(() => {
     return (key: string) => {
-      const LABEL = "LEBRON";
+      const LABEL = QR.VENDOR;
       const URI: string[] = [];
 
       URI.push("otpauth://totp/");
@@ -32,7 +33,7 @@ export default function DisplayQR() {
   return (
     <div className="w-full h-screen bg-black flex flex-col items-center justify-center relative overflow-hidden">
       {/* Header */}
-      <motion.div 
+      <motion.div
         className="text-center mb-8 z-10"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -41,11 +42,10 @@ export default function DisplayQR() {
         <h1 className="text-white font-bold text-4xl md:text-5xl mb-4">
           Scan this with Duo!
         </h1>
-
       </motion.div>
 
       {/* QR Code with Pulsating Effect */}
-      <motion.div 
+      <motion.div
         className="relative z-10"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -62,7 +62,7 @@ export default function DisplayQR() {
                 transform: "translateZ(0)", // Hardware acceleration
               }}
             />
-            
+
             {/* QR Code with Row-by-Row Animation */}
             <div className="relative z-10 bg-white p-6 rounded-2xl shadow-2xl overflow-hidden">
               <motion.div
@@ -72,16 +72,16 @@ export default function DisplayQR() {
                 transition={{
                   duration: 2,
                   ease: "easeInOut",
-                  delay: 0.5
+                  delay: 0.5,
                 }}
               >
-                <QRCodeSVG 
-                  value={value} 
+                <QRCodeSVG
+                  value={value}
                   size={400}
                   className="drop-shadow-lg"
                 />
               </motion.div>
-              
+
               {/* Scanning line effect */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/20 to-transparent"
@@ -90,7 +90,7 @@ export default function DisplayQR() {
                 transition={{
                   duration: 2,
                   ease: "easeInOut",
-                  delay: 0.5
+                  delay: 0.5,
                 }}
                 style={{
                   height: "2px",
