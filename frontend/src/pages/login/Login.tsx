@@ -9,7 +9,7 @@ interface Inputs {
   password: string;
 }
 export default function Login() {
-  const [cookies, setCookie, removeCookie] = useCookies(["jwt_token"]);
+  const [, setCookie] = useCookies(["jwt_token"]);
 
   const nav = useNavigate();
   const [inputs, setInputs] = useState<Inputs>({ username: "", password: "" });

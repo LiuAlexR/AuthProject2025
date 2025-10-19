@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import "leaflet-defaulticon-compatibility";
 import "./App.css";
-import { JavaServer, type UserFetchRequestModel } from "./Technicals";
-import { useCookies } from "react-cookie";
+import { JavaServer } from "./Technicals";
+// import { useCookies } from "react-cookie";
 interface LocationUpdate {
   _type: string;
   tid: string;
@@ -19,42 +19,43 @@ interface LocationUpdate {
   batt: number;
 }
 
-async function requestCurrentData(
-  userID: number,
-  jwt: string,
-  users: number[],
-) {
-  const body: UserFetchRequestModel = {
-    user_id: userID,
-    jwt: jwt,
-    fetchableIDs: users,
-  };
-
-  try {
-    const CONN: string =
-      JavaServer.PORT + JavaServer.WEB_SERVER + JavaServer.GET_OTHERS_LOCATIONS;
-
-    console.log(CONN);
-    const response = await fetch(CONN, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-
-    const data = await response.json();
-  } catch (error: any) {
-    console.log(error);
-  }
-}
+// async function requestCurrentData(
+//   userID: number,
+//   jwt: string,
+//   users: number[],
+// ) {
+//   const body: UserFetchRequestModel = {
+//     user_id: userID,
+//     jwt: jwt,
+//     fetchableIDs: users,
+//   };
+//
+//   try {
+//     const CONN: string =
+//       JavaServer.PORT + JavaServer.WEB_SERVER + JavaServer.GET_OTHERS_LOCATIONS;
+//
+//     console.log(CONN);
+//     const response = await fetch(CONN, {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify(body),
+//     });
+//
+//     const data = await response.json();
+//     console.log(data);
+//   } catch (error: any) {
+//     console.log(error);
+//   }
+// }
 
 export default function Map() {
   const [lastLatitude, setLastLatitude] = useState(-0.09);
   const [lastLongitude, setLastLongitude] = useState<number>(51.505);
-  const [cookie, setCookie, removeCookie] = useCookies(["jwt_token"]);
-  let position: LatLngExpression = [lastLatitude, lastLongitude];
-  const [ids, setIds] = useState<String[]>([]);
+  // const [cookie, setCookie, removeCookie] = useCookies(["jwt_token"]);
+  const position: LatLngExpression = [lastLatitude, lastLongitude];
+  const [ids, setIds] = useState<string[]>([]);
 
   const getId = async () => {
     try {
@@ -68,7 +69,7 @@ export default function Map() {
         },
       });
 
-      const data: String[] = await response.json();
+      const data: string[] = await response.json();
       setIds(data);
     } catch (error: any) {
       console.log(error);

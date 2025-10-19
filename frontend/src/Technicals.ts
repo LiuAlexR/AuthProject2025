@@ -21,7 +21,7 @@ export enum QR {
 
 export interface UserFetchRequestModel {
   user_id: number;
-  jwt: String;
+  jwt: string;
   fetchableIDs: number[];
 }
 

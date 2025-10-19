@@ -1,6 +1,5 @@
 import { useRef, useState, useEffect, type ChangeEvent } from "react";
 import React from "react";
-import { useLocation } from "react-router";
 import { motion } from "framer-motion";
 import { RustServer } from "../../Technicals";
 import { useCookies } from "react-cookie";
@@ -12,7 +11,7 @@ interface MFARequest {
 
 export default function LoginMFA() {
   //  const jwt: string = useLocation().state.jwt;
-  const [cookies, setCookie, removeCookie] = useCookies(["jwt_token"]);
+  const [cookies, setCookie] = useCookies(["jwt_token"]);
   const NUMBERS = RegExp("^[0-9]+$");
   const [digits, setDigits] = useState<string[]>(Array(6).fill(""));
   const [loading, setLoading] = useState<boolean>(false);

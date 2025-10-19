@@ -1,6 +1,7 @@
 package com.example.website_backend;
 
 import org.bson.json.JsonWriterSettings;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.example.website_backend.models.UserFetchRequestModel;
@@ -31,15 +32,15 @@ public class WebsiteBackendApplication {
 		// MathService math = new MathService();
 		// boolean verified = math.verifyJWTSignature("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiNTI1NDk5ODU5MjF9.tYoDsfVnUo7koyVeELrdi_b-EF7GyJWuZ4SmBEf_cMI=");
 		// System.out.println(verified);
-		DatabaseService service = new DatabaseService();
-		WebService webService = new WebService();
-		var x = service.getLocation(1);
-		UserFetchRequestModel model = new UserFetchRequestModel(1, "ADMIN", new int[] {1,2,3});
-		System.out.println(webService.parseRequest(model));
-		System.out.println(x.toJson(JsonWriterSettings
-                    .builder()
-                    .build()));
-		// SpringApplication.run(WebsiteBackendApplication.class, args);
+//		DatabaseService service = new DatabaseService();
+//		WebService webService = new WebService();
+//		var x = service.getLocation(1);
+//		UserFetchRequestModel model = new UserFetchRequestModel(1, "ADMIN", new int[] {1,2,3});
+//		System.out.println(webService.parseRequest(model));
+//		System.out.println(x.toJson(JsonWriterSettings
+//                    .builder()
+//                    .build()));
+		 SpringApplication.run(WebsiteBackendApplication.class, args);
 	}
 
 }
