@@ -4,7 +4,11 @@ import type { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import "leaflet-defaulticon-compatibility";
-import { JavaServer } from "./Technicals";
+import {
+  JavaServer,
+  type UserFetchRequestModel,
+  type UserExposed,
+} from "./Technicals";
 
 interface LocationUpdate {
   _type: string;
@@ -24,6 +28,9 @@ export default function Map() {
   const position: LatLngExpression = [lastLatitude, lastLongitude];
   const [ids, setIds] = useState<string[]>([]);
   const [moving, setMoving] = useState<boolean>(false);
+  const [userLocations, setUserLocations] = useState<UserExposed[]>([]);
+  const [jwt, setJwt] = useState<string>("ADMIN"); // You can update this with actual JWT
+  const [currentUserId, setCurrentUserId] = useState<number>(1); // You can update this with actual user ID
 
   const getId = async () => {
     try {
@@ -44,66 +51,138 @@ export default function Map() {
     }
   };
 
+  const fetchOthersLocations = async (userIds: number[]) => {
+    try {
+      const CONN: string =
+        JavaServer.PORT +
+        JavaServer.WEB_SERVER +
+        JavaServer.GET_OTHERS_LOCATIONS;
+
+      const body: UserFetchRequestModel = {
+        user_id: currentUserId,
+        jwt: jwt,
+        fetchableIDs: userIds,
+      };
+
+      console.log("Fetching locations from:", CONN);
+      const response = await fetch(CONN, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.text();
+      console.log("Received locations:", data);
+
+      // Parse the weird Java JSON response with double braces
+      if (data && data !== "Error. Invalid JWT token") {
+        try {
+          // Remove the outer braces and parse as array of JSON objects
+          let cleanedData = data.trim();
+          if (cleanedData.startsWith("{{")) {
+            cleanedData =
+              "[" + cleanedData.substring(1, cleanedData.length - 1) + "]";
+          }
+
+          const parsedData = JSON.parse(cleanedData);
+          console.log("Parsed locations:", parsedData);
+
+          // Map to UserExposed format - handle both unixTime and timestamp fields
+          const locationsArray: UserExposed[] = parsedData.map((item: any) => ({
+            user_id: item.user_id,
+            latitude: item.latitude,
+            longitude: item.longitude,
+            altitude: item.altitude,
+            timeOfEventMS: item.unixTime || item.timestamp || 0,
+          }));
+
+          setUserLocations(locationsArray);
+          console.log("User locations set:", locationsArray);
+
+          // Update map to first user's location if available
+          if (
+            locationsArray.length > 0 &&
+            locationsArray[0].latitude !== 0 &&
+            locationsArray[0].longitude !== 0
+          ) {
+            setLastLatitude(locationsArray[0].latitude);
+            setLastLongitude(locationsArray[0].longitude);
+          }
+
+          return locationsArray;
+        } catch (e) {
+          console.error("Error parsing location data:", e);
+          console.error("Raw data:", data);
+        }
+      }
+    } catch (error: any) {
+      console.log("Error fetching locations:", error);
+    }
+  };
+
   useEffect(() => {
     getId();
   }, []);
 
-  const getRealTimeData = async () => {
-    const URI: string[] = [];
-    URI.push(JavaServer.PORT);
-    URI.push(JavaServer.WEB_SERVER);
-    URI.push(JavaServer.GET_LOCATION);
-
-    try {
-      const response = await fetch(URI.join(""));
-      const data: LocationUpdate[] = await response.json();
-      console.log(data);
-
-      if (lastLatitude == data[9].lat && lastLongitude == data[9].lon) {
-        setMoving(false);
-        return;
-      }
-      setMoving(true);
-
-      for (let i = 0; i < data.length; i++) {
-        position[0] = 100;
-        position[1] = 100;
-        console.log("Iteration: " + i);
-        new Promise((resolve) => setTimeout(resolve, 500));
-      }
-
-      setLastLatitude(data[9].lat);
-      setLastLongitude(data[9].lon);
-    } catch (error: any) {
-      console.log(error.message);
-    }
-  };
-
   const UpdateMarker = () => {
     return (
-      <Marker position={position}>
-        <Popup>
-          <div className="text-sm">
-            <p className="font-semibold text-gray-800">Current Location</p>
-            <p className="text-gray-600 text-xs mt-1">
-              {lastLatitude.toFixed(6)}, {lastLongitude.toFixed(6)}
-            </p>
-          </div>
-        </Popup>
-      </Marker>
+      <>
+        {/* Main position marker */}
+        <Marker position={position}>
+          <Popup>
+            <div className="text-sm">
+              <p className="font-semibold text-gray-800">Current Location</p>
+              <p className="text-gray-600 text-xs mt-1">
+                {lastLatitude.toFixed(6)}, {lastLongitude.toFixed(6)}
+              </p>
+            </div>
+          </Popup>
+        </Marker>
+
+        {/* User location markers */}
+        {userLocations.map(
+          (user) =>
+            user.latitude !== 0 &&
+            user.longitude !== 0 && (
+              <Marker
+                key={user.user_id}
+                position={[user.latitude, user.longitude]}
+              >
+                <Popup>
+                  <div className="text-sm">
+                    <p className="font-semibold text-gray-800">
+                      User {user.user_id}
+                    </p>
+                    <p className="text-gray-600 text-xs mt-1">
+                      Lat: {user.latitude.toFixed(6)}
+                    </p>
+                    <p className="text-gray-600 text-xs">
+                      Lon: {user.longitude.toFixed(6)}
+                    </p>
+                    <p className="text-gray-600 text-xs">
+                      Alt: {user.altitude.toFixed(2)}m
+                    </p>
+                  </div>
+                </Popup>
+              </Marker>
+            ),
+        )}
+      </>
     );
   };
 
   useEffect(() => {
     if (moving) {
       const interval = setInterval(() => {
-        getRealTimeData();
+        fetchOthersLocations([1, 2, 3]);
         console.log("AFTER 2 sec");
       }, 2000);
       return () => clearInterval(interval);
     } else {
       const interval = setInterval(() => {
-        getRealTimeData();
+        fetchOthersLocations([1, 2, 3]);
         console.log("After 5 s");
       }, 5000);
       return () => clearInterval(interval);
@@ -254,10 +333,10 @@ export default function Map() {
                 </button>
 
                 <button
-                  onClick={getRealTimeData}
+                  onClick={() => fetchOthersLocations([1, 2, 3])}
                   className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-medium shadow-lg shadow-blue-500/50 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/60"
                 >
-                  <span className="text-sm">Longitude is {lastLongitude}</span>
+                  <span className="text-sm">Fetch User Locations</span>
                 </button>
 
                 <button
@@ -265,6 +344,13 @@ export default function Map() {
                   className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-medium shadow-lg shadow-emerald-500/50 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/60"
                 >
                   <span className="text-sm">Hello World</span>
+                </button>
+
+                <button
+                  onClick={() => fetchOthersLocations([1, 2, 3])}
+                  className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium shadow-lg shadow-orange-500/50 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-500/60"
+                >
+                  <span className="text-sm">Refresh Locations</span>
                 </button>
               </div>
             </div>
