@@ -90,7 +90,7 @@ export default function IntroAnimation() {
   useEffect(() => {
     async function run() {
       await timeline();
-      nav("/home");
+      nav("/login");
     }
 
     run();

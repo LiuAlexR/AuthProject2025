@@ -2,7 +2,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import "leaflet-defaulticon-compatibility";
 
-import { Route, Routes, BrowserRouter } from "react-router";
+import { Route, Routes, HashRouter, BrowserRouter } from "react-router";
 import QR_Page from "./QR-Page";
 import Map from "./Map";
 import Home from "./pages/home/Home";

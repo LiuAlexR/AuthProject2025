@@ -3,6 +3,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { RustServer } from "../../Technicals";
 import { useCookies } from "react-cookie";
+import { useNavigate } from "react-router";
 
 interface MFARequest {
   jwt: string;
@@ -18,6 +19,7 @@ export default function LoginMFA() {
   const [message, setMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState<boolean>(false);
   const digitRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const nav = useNavigate();
 
   // Autofocus on first input
   useEffect(() => {
@@ -58,6 +60,7 @@ export default function LoginMFA() {
       setCookie("jwt_token", data);
       setMessage("Verification successful!");
       setIsError(false);
+      nav("/map");
     } catch (error: any) {
       console.log(error);
       setMessage(error.message || "An error occurred. Please try again.");

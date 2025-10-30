@@ -10,27 +10,30 @@ import {
   type UserExposed,
 } from "./Technicals";
 
-interface LocationUpdate {
-  _type: string;
-  tid: string;
-  lat: number;
-  lon: number;
-  tst: number;
-  acc: number;
-  alt: number;
-  vel: number;
-  batt: number;
-}
+// interface LocationUpdate {
+//   _type: string;
+//   tid: string;
+//   lat: number;
+//   lon: number;
+//   tst: number;
+//   acc: number;
+//   alt: number;
+//   vel: number;
+//   batt: number;
+// }
 
 export default function Map() {
   const [lastLatitude, setLastLatitude] = useState(-0.09);
   const [lastLongitude, setLastLongitude] = useState<number>(51.505);
   const position: LatLngExpression = [lastLatitude, lastLongitude];
   const [ids, setIds] = useState<string[]>([]);
-  const [moving, setMoving] = useState<boolean>(false);
+  // const [moving, setMoving] = useState<boolean>(false);
+  const moving = false;
   const [userLocations, setUserLocations] = useState<UserExposed[]>([]);
-  const [jwt, setJwt] = useState<string>("ADMIN"); // You can update this with actual JWT
-  const [currentUserId, setCurrentUserId] = useState<number>(1); // You can update this with actual user ID
+  const jwt = "ADMIN";
+  // const [jwt, _] = useState<string>("ADMIN"); // You can update this with actual JWT
+  // const [currentUserId, _] = useState<number>(1); // You can update this with actual user ID
+  const currentUserId = 1;
 
   const getId = async () => {
     try {

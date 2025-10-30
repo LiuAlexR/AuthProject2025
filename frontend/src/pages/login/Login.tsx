@@ -226,10 +226,10 @@ export default function Login() {
             transition={{ duration: 0.6, delay: 1.2 }}
           >
             <a
-              href="#"
+              href="/create-account"
               className="text-white/60 hover:text-white/80 text-sm transition-colors duration-300"
             >
-              Forgot your password?
+              Create Account
             </a>
           </motion.div>
         </motion.div>

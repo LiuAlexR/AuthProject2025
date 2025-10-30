@@ -12,7 +12,7 @@ use mongodb::{
     bson::{Document, doc},
 };
 
-const URI: &str = "mongodb://localhost:27017/";
+const URI: &str = "mongodb://mongo:27017/";
 pub async fn get_user_id_from_username(username: &str) -> Result<Option<Document>, UserError> {
     let client = match Client::with_uri_str(URI).await {
         Ok(success) => success,
@@ -33,13 +33,11 @@ pub async fn get_user_password(user_id: i32) -> Result<Option<Document>, UserErr
     };
     let database = client.database("Life360");
     let my_coll: Collection<Document> = database.collection("authentication");
-    let found = match my_coll.find_one(doc! { "user_id": user_id }).await{
-        Ok(val) => {
-            val
-        },
+    let found = match my_coll.find_one(doc! { "user_id": user_id }).await {
+        Ok(val) => val,
         Err(_) => {
             return Err(UserError::DatabaseLookupError);
-        },
+        }
     };
 
     Ok(found)
@@ -192,7 +190,8 @@ pub async fn create_new_user(
     Ok(())
 }
 
-pub async fn add_secret_key(username: &str, key: &str) -> Result<(), mongodb::error::Error> { // Not in use
+pub async fn add_secret_key(username: &str, key: &str) -> Result<(), mongodb::error::Error> {
+    // Not in use
     let client = Client::with_uri_str(URI).await?;
     let database = client.database("Life360");
     let collection: Collection<Document> = database.collection("authenti");
@@ -235,7 +234,10 @@ pub fn create_secret_key() -> String {
     BASE32.encode(key.as_bytes())
 }
 /// Allows some user to view another user
-pub async fn create_user_watch_request(user_to_watch: i32, user_that_watches: i32) -> Result<u64, UserError> {
+pub async fn create_user_watch_request(
+    user_to_watch: i32,
+    user_that_watches: i32,
+) -> Result<u64, UserError> {
     let client = match Client::with_uri_str(URI).await {
         Ok(success) => success,
         Err(_) => return Err(UserError::DatabaseLookupError),
@@ -250,14 +252,12 @@ pub async fn create_user_watch_request(user_to_watch: i32, user_that_watches: i3
             "r_can_see_me": user_that_watches,
         }
     };
-    let _update_result = match user_relations
-        .update_one(filter, update)
-        .await {
-            Ok(res) => res,
-            Err(_) => {
-                return Err(UserError::UserDoesNotExistError);
-            },
-        };
+    let _update_result = match user_relations.update_one(filter, update).await {
+        Ok(res) => res,
+        Err(_) => {
+            return Err(UserError::UserDoesNotExistError);
+        }
+    };
     let filter_can_watch = doc! {
         "user_id": user_that_watches
     };
@@ -268,13 +268,14 @@ pub async fn create_user_watch_request(user_to_watch: i32, user_that_watches: i3
     };
     let _update_result_can_watch = match user_relations
         .update_one(filter_can_watch, update_can_watch)
-        .await {
-            Ok(res) => res,
-            Err(_) => {
-                return Err(UserError::UserDoesNotExistError);
-            },
-        };
-    
+        .await
+    {
+        Ok(res) => res,
+        Err(_) => {
+            return Err(UserError::UserDoesNotExistError);
+        }
+    };
+
     // let user_to_watch_doc_option: Option<Document> = match user_relations
     //     .find_one(doc! {
     //         "user_id": user_to_watch,
@@ -312,19 +313,21 @@ pub async fn create_user_watch_request(user_to_watch: i32, user_that_watches: i3
     //         return Err(UserError::UserDoesNotExistError);
     //     },
     // };
-    
-    
+
     return Ok(_update_result.modified_count);
 }
 /// Allows some user to view another user
-pub async fn resolve_user_watch_request(user_to_watch: i32, user_that_watches: i32) -> Result<u64, UserError> {
+pub async fn resolve_user_watch_request(
+    user_to_watch: i32,
+    user_that_watches: i32,
+) -> Result<u64, UserError> {
     let client = match Client::with_uri_str(URI).await {
         Ok(success) => success,
         Err(_) => return Err(UserError::DatabaseLookupError),
     };
     let database = client.database("Life360");
     let user_relations: Collection<Document> = database.collection("relations");
-    let mut counter:i8 = 0;
+    let mut counter: i8 = 0;
     let filter_r_user_to_watch = doc! {
         "user_id": user_to_watch
     };
@@ -335,12 +338,13 @@ pub async fn resolve_user_watch_request(user_to_watch: i32, user_that_watches: i
     };
     let update_pull_user_to_watch_result = match user_relations
         .update_one(filter_r_user_to_watch, update_pull_user_that_watches)
-        .await {
-            Ok(res) => res,
-            Err(_) => {
-                return Err(UserError::UserDoesNotExistError);
-            },
-        };
+        .await
+    {
+        Ok(res) => res,
+        Err(_) => {
+            return Err(UserError::UserDoesNotExistError);
+        }
+    };
 
     if update_pull_user_to_watch_result.modified_count == 1 {
         counter = counter + 1;
@@ -355,12 +359,13 @@ pub async fn resolve_user_watch_request(user_to_watch: i32, user_that_watches: i
     };
     let update_user_can_watch_result = match user_relations
         .update_one(filter_r_can_watch, update_r_can_watch)
-        .await {
-            Ok(res) => res,
-            Err(_) => {
-                return Err(UserError::UserDoesNotExistError);
-            },
-        };
+        .await
+    {
+        Ok(res) => res,
+        Err(_) => {
+            return Err(UserError::UserDoesNotExistError);
+        }
+    };
     if update_user_can_watch_result.modified_count == 1 {
         counter = counter + 1;
     }
@@ -377,12 +382,13 @@ pub async fn resolve_user_watch_request(user_to_watch: i32, user_that_watches: i
     };
     let _update_result = match user_relations
         .update_one(filter_user_to_watch, update)
-        .await {
-            Ok(res) => res,
-            Err(_) => {
-                return Err(UserError::UserDoesNotExistError);
-            },
-        };
+        .await
+    {
+        Ok(res) => res,
+        Err(_) => {
+            return Err(UserError::UserDoesNotExistError);
+        }
+    };
     let filter_can_watch = doc! {
         "user_id": user_that_watches
     };
@@ -393,15 +399,16 @@ pub async fn resolve_user_watch_request(user_to_watch: i32, user_that_watches: i
     };
     let _update_result_can_watch = match user_relations
         .update_one(filter_can_watch, update_can_watch)
-        .await {
-            Ok(res) => res,
-            Err(_) => {
-                return Err(UserError::UserDoesNotExistError);
-            },
-        };
+        .await
+    {
+        Ok(res) => res,
+        Err(_) => {
+            return Err(UserError::UserDoesNotExistError);
+        }
+    };
     return Ok(_update_result.modified_count);
 }
-/// Resets the server. Creates Alice, Bob, and Eve. Alice has a password of 1234, Bob has a password of 12345, Eve has a password of 123456. 
+/// Resets the server. Creates Alice, Bob, and Eve. Alice has a password of 1234, Bob has a password of 12345, Eve has a password of 123456.
 /// Alice and Bob are capable of viewing each other's location. Alice has a active request to view Eve's location, and Eve has an active request to view Bob's location
 /// Purposely chosen for authentication server, despite concerning user information
 pub async fn reset_database() -> Result<bool, mongodb::error::Error> {

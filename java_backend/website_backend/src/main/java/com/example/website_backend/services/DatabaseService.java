@@ -14,7 +14,7 @@ import com.mongodb.client.model.UpdateOptions;
 
 @Service
 public class DatabaseService {
-    String connectionString = "mongodb://localhost:27017/";
+    String connectionString = "mongodb://mongo:27017/";
     MongoClient mongoClient = MongoClients.create(connectionString);
     MongoDatabase theUsers = mongoClient.getDatabase("Life360");
     public Document getAuthDocument(String username) {
